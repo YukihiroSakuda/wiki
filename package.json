@@ -1,0 +1,56 @@
+{
+  "name": "wiki",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:prod": "prisma migrate deploy --schema prisma/schema.prod.prisma",
+    "db:push:prod": "prisma db push --schema prisma/schema.prod.prisma",
+    "db:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/azure": "^3.0.51",
+    "@azure/identity": "^4.13.1",
+    "@azure/search-documents": "^12.2.0",
+    "@azure/storage-blob": "^12.31.0",
+    "@libsql/client": "^0.17.2",
+    "@prisma/adapter-libsql": "^7.6.0",
+    "@prisma/client": "^7.6.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "ai": "^6.0.145",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.7.0",
+    "next": "14.2.35",
+    "next-auth": "^4.24.13",
+    "prisma": "^7.6.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^3.5.0",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,13 @@
+.git
+.github
+.next
+node_modules
+prisma/dev.db
+prisma/dev.db-journal
+prisma/migrations
+public/uploads
+.env
+.env.local
+.env*.local
+*.md
+docs/
