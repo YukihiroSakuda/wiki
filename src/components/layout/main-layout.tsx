@@ -11,12 +11,15 @@ interface MainLayoutProps {
   children: React.ReactNode;
   showRightSidebar?: boolean;
   rightSidebarProps?: React.ComponentProps<typeof RightSidebar>;
+  /** Editor mode: removes scroll, makes content fill viewport height */
+  fullHeight?: boolean;
 }
 
 export function MainLayout({
   children,
   showRightSidebar = false,
   rightSidebarProps,
+  fullHeight = false,
 }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -27,7 +30,12 @@ export function MainLayout({
   const toggleSidebar = () => setSidebarOpen((v) => !v);
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] font-mono">
+    <div
+      className={cn(
+        "bg-[var(--color-bg-primary)] font-mono",
+        fullHeight ? "h-screen overflow-hidden" : "min-h-screen"
+      )}
+    >
       <Header onToggleSidebar={toggleSidebar} appName={env.APP_NAME} />
 
       {/* Mobile overlay backdrop */}
@@ -44,13 +52,19 @@ export function MainLayout({
 
       <main
         className={cn(
-          "pt-10 transition-all duration-200",
-          "sm:transition-[margin]",
+          "pt-10 transition-all duration-200 sm:transition-[margin]",
           sidebarOpen ? "sm:ml-52" : "sm:ml-0",
-          showRightSidebar ? "sm:mr-60" : "sm:mr-0"
+          showRightSidebar ? "sm:mr-60" : "sm:mr-0",
+          fullHeight && "flex h-[calc(100vh-2.5rem)] flex-col"
         )}
       >
-        <div className="p-4 sm:p-6">{children}</div>
+        {fullHeight ? (
+          <div className="flex flex-1 flex-col overflow-hidden px-4 pb-3 pt-4 sm:px-6 sm:pt-5">
+            {children}
+          </div>
+        ) : (
+          <div className="p-4 sm:p-6">{children}</div>
+        )}
       </main>
     </div>
   );
