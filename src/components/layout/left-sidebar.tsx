@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { FileText, Home, MessageSquare, Plus, Settings } from "lucide-react";
+import { FileText, Home, MessageSquare, Plus, Settings, Trophy } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,6 +12,7 @@ interface LeftSidebarProps {
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/pages", label: "All Pages", icon: FileText },
+  { href: "/ranking", label: "Ranking", icon: Trophy },
   { href: "/chat", label: "AI Chat", icon: MessageSquare },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -31,7 +32,7 @@ export function LeftSidebar({ isOpen }: LeftSidebarProps) {
       <div className="flex min-w-52 flex-col gap-1 p-3">
         {/* New page */}
         <Link
-          href="/new"
+          href="/editor"
           className={cn(
             "mb-2 flex items-center gap-2 rounded border px-3 py-1.5 text-sm",
             "border-[var(--color-border)] text-[var(--color-text-secondary)]",

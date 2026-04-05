@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
         include: {
           author: { select: { name: true, email: true } },
           tags: { include: { tag: true } },
-          _count: { select: { pageViews: true } },
+          _count: { select: { pageViews: true, likes: true } },
         },
         orderBy: sort === "views" ? { pageViews: { _count: "desc" } } : { updatedAt: "desc" },
         take: limit,

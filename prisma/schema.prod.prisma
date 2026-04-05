@@ -23,6 +23,7 @@ model User {
   pages     Page[]
   revisions Revision[]
   pageViews PageView[]
+  pageLikes PageLike[]
 }
 
 model Page {
@@ -38,6 +39,7 @@ model Page {
   tags      PageTag[]
   revisions Revision[]
   pageViews PageView[]
+  likes     PageLike[]
   aiSummary AISummary?
 
   outgoingLinks PageLink[] @relation("SourcePage")
@@ -103,4 +105,16 @@ model PageLink {
   targetPage Page @relation("TargetPage", fields: [targetPageId], references: [id], onDelete: Cascade)
 
   @@id([sourcePageId, targetPageId])
+}
+
+model PageLike {
+  pageId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([pageId, userId])
+  @@index([pageId])
 }

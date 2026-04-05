@@ -5,7 +5,17 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { FileText, Search, Zap, X, Plus, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  Eye,
+  ThumbsUp,
+  FileText,
+  Search,
+  Zap,
+  X,
+  Plus,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -15,7 +25,7 @@ interface PageItem {
   updatedAt: string;
   author: { name: string };
   tags: { tag: { name: string } }[];
-  _count: { pageViews: number };
+  _count: { pageViews: number; likes: number };
 }
 
 interface SearchResult {
@@ -32,7 +42,7 @@ interface TagItem {
   _count: { pages: number };
 }
 
-type SortKey = "updated" | "created" | "title";
+type SortKey = "updated" | "created" | "title" | "views";
 type SearchMode = "fulltext" | "semantic";
 
 function timeAgo(date: string): string {
@@ -81,7 +91,9 @@ function ColHeader({
         onClick={() => onClick(sortKey)}
         className={cn(
           "flex items-center gap-1 font-mono text-xs font-bold uppercase tracking-wider transition-colors duration-100",
-          active ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+          active
+            ? "text-[var(--color-accent)]"
+            : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
         )}
       >
         {label}
@@ -107,17 +119,14 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
 
   const isSearching = query.trim().length > 0;
 
-  const fetchPages = useCallback(
-    async (tags: string[], sortKey: SortKey, signal: AbortSignal) => {
-      const params = new URLSearchParams({ sort: sortKey, limit: "200" });
-      if (tags.length > 0) params.set("tags", tags.join(","));
-      const res = await fetch(`/api/pages?${params}`, { signal });
-      if (!res.ok) throw new Error("fetch failed");
-      const data = await res.json();
-      return { pages: data.pages as PageItem[], total: data.total as number };
-    },
-    []
-  );
+  const fetchPages = useCallback(async (tags: string[], sortKey: SortKey, signal: AbortSignal) => {
+    const params = new URLSearchParams({ sort: sortKey, limit: "200" });
+    if (tags.length > 0) params.set("tags", tags.join(","));
+    const res = await fetch(`/api/pages?${params}`, { signal });
+    if (!res.ok) throw new Error("fetch failed");
+    const data = await res.json();
+    return { pages: data.pages as PageItem[], total: data.total as number };
+  }, []);
 
   const fetchSearch = useCallback(
     async (q: string, searchMode: SearchMode, tags: string[], signal: AbortSignal) => {
@@ -181,7 +190,6 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
 
   return (
     <div className="flex flex-col gap-4">
-
       {/* ── Top bar ── */}
       <div className="flex flex-wrap items-center gap-3">
         {/* Title + count */}
@@ -255,7 +263,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
 
         {/* New page */}
         <Link
-          href="/new"
+          href="/editor"
           className={cn(
             "flex items-center gap-1.5 rounded border px-3 py-1.5",
             "border-[var(--color-border)] font-mono text-xs text-[var(--color-text-secondary)]",
@@ -301,7 +309,9 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
             </button>
           )}
           {isSearching && mode === "semantic" && (
-            <span className="ml-auto font-mono text-xs text-[var(--color-accent)]">· 意味検索モード</span>
+            <span className="ml-auto font-mono text-xs text-[var(--color-accent)]">
+              · 意味検索モード
+            </span>
           )}
         </div>
       )}
@@ -311,30 +321,55 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg-sidebar)]">
-              <ColHeader label="タイトル" sortKey="title" current={sort} onClick={!isSearching ? setSort : undefined} />
+              <ColHeader
+                label="タイトル"
+                sortKey="title"
+                current={sort}
+                onClick={!isSearching ? setSort : undefined}
+              />
               <th className="px-4 py-2 text-left font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
                 Tags
               </th>
               <th className="w-28 px-4 py-2 text-left font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
                 作成者
               </th>
-              <ColHeader label="更新日" sortKey="updated" current={sort} onClick={!isSearching ? setSort : undefined} />
+              <ColHeader
+                label="更新日"
+                sortKey="updated"
+                current={sort}
+                onClick={!isSearching ? setSort : undefined}
+              />
+              <ColHeader
+                label="閲覧"
+                sortKey="views"
+                current={sort}
+                onClick={!isSearching ? setSort : undefined}
+              />
+              <th className="w-16 px-4 py-2 text-left font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                いいね
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
             {/* Empty states */}
             {!loading && isSearching && searchResults !== null && searchResults.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center font-mono text-sm text-[var(--color-text-secondary)]">
+                <td
+                  colSpan={6}
+                  className="px-4 py-8 text-center font-mono text-sm text-[var(--color-text-secondary)]"
+                >
                   該当するページが見つかりませんでした。
                 </td>
               </tr>
             )}
             {!loading && !isSearching && pages.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center font-mono text-sm text-[var(--color-text-secondary)]">
+                <td
+                  colSpan={6}
+                  className="px-4 py-8 text-center font-mono text-sm text-[var(--color-text-secondary)]"
+                >
                   ページがありません。{" "}
-                  <Link href="/new" className="text-[var(--color-accent)] hover:underline">
+                  <Link href="/editor" className="text-[var(--color-accent)] hover:underline">
                     作成する
                   </Link>
                 </td>
@@ -351,7 +386,10 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
                   <td className="px-4 py-2.5">
                     <Link href={`/wiki/${r.slug}`} className="block">
                       <div className="flex items-center gap-2">
-                        <FileText size={12} className="shrink-0 text-[var(--color-text-secondary)]" />
+                        <FileText
+                          size={12}
+                          className="shrink-0 text-[var(--color-text-secondary)]"
+                        />
                         <span className="font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)]">
                           {r.title}
                         </span>
@@ -370,9 +408,17 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-[var(--color-text-muted)]">—</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-[var(--color-text-muted)]">
+                    —
+                  </td>
                   <td className="px-4 py-2.5 font-mono text-xs text-[var(--color-text-muted)]">
                     {timeAgo(r.updatedAt)}
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-[var(--color-text-muted)]">
+                    —
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-[var(--color-text-muted)]">
+                    —
                   </td>
                 </tr>
               ))}
@@ -385,10 +431,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
                   className="group transition-colors duration-100 hover:bg-[var(--color-bg-sidebar)]"
                 >
                   <td className="px-4 py-2.5">
-                    <Link
-                      href={`/wiki/${page.slug}`}
-                      className="flex items-center gap-2"
-                    >
+                    <Link href={`/wiki/${page.slug}`} className="flex items-center gap-2">
                       <FileText size={12} className="shrink-0 text-[var(--color-text-secondary)]" />
                       <span className="font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)]">
                         {page.title}
@@ -407,6 +450,18 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
                   </td>
                   <td className="px-4 py-2.5 font-mono text-xs text-[var(--color-text-muted)]">
                     {timeAgo(page.updatedAt)}
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-[var(--color-text-muted)]">
+                    <span className="flex items-center gap-1">
+                      <Eye size={11} />
+                      {page._count.pageViews}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-[var(--color-text-muted)]">
+                    <span className="flex items-center gap-1">
+                      <ThumbsUp size={11} />
+                      {page._count.likes}
+                    </span>
                   </td>
                 </tr>
               ))}

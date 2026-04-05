@@ -110,7 +110,7 @@ export default async function SearchPage({ searchParams }: Props) {
             </p>
             {(q || tag) && (
               <Link
-                href="/new"
+                href="/editor"
                 className="font-mono text-sm text-[var(--color-accent)] hover:underline"
               >
                 Create a new page →

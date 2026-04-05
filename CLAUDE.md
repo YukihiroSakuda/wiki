@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev          # Start development server (Next.js on port 3000)
 npm run build        # Production build
+npm run start        # Start production server
 npm run lint         # ESLint via next lint
 
 npm run db:migrate   # Run Prisma migrations (local SQLite dev)
@@ -21,6 +22,7 @@ npm run db:push:prod      # Push schema to Azure SQL without migrations
 ### Tech Stack
 - **Next.js 14** (App Router) + **React 18** + **TypeScript**
 - **Prisma** ORM — dual schema: `prisma/schema.prisma` (SQLite/libsql for local dev), `prisma/schema.prod.prisma` (Azure SQL Server for prod). `src/lib/prisma.ts` auto-selects adapter based on `DATABASE_URL` prefix.
+- **Vercel AI SDK v6** (`ai` package) with `@ai-sdk/azure` adapter — all LLM calls go through `src/lib/ai/client.ts` (`getAzureClient()`).
 - **Zustand** for client state (`src/stores/`)
 - **Tailwind CSS** + CSS variables for theming (light/dark, accent colors)
 - **JetBrains Mono** — the only font used throughout the app
@@ -72,6 +74,9 @@ NextAuth with Azure AD provider (`src/app/api/auth/[...nextauth]/route.ts`). Mid
 - `Page` has `slug` (URL key), `content` (Markdown), tags via `PageTag`, revision history via `Revision`, AI summary via `AISummary`.
 - `PageLink` tracks wiki-style `[[links]]` between pages (parsed on save).
 - `PageView` tracks per-user view history for "recently viewed" dashboard widget.
+
+### File Attachment & Extraction
+`src/lib/file-extractor.ts` + `src/lib/file-to-images.ts`. Supported: PDF, Word, Excel, PowerPoint, images. All types are converted to images via `@napi-rs/canvas` (PDF page rendering) or `adm-zip` (Office embedded images), then fed to GPT Vision (`MODELS.GPT_FAST`) for Markdown extraction. Upload endpoint: `/api/upload` (Azure Blob) → extraction endpoint: `/api/extract-file`. Editor component: `src/components/editor/file-upload.tsx`.
 
 ### Theming
 CSS variables in `src/app/globals.css`, switched by `data-theme` and `data-accent` attributes on `<html>`. User preferences persisted in DB (`User.theme`, `User.accentColor`) and synced to `ThemeStore` (Zustand) on login.

@@ -9,7 +9,7 @@ async function getInitialData() {
       include: {
         tags: { include: { tag: true } },
         author: { select: { name: true } },
-        _count: { select: { pageViews: true } },
+        _count: { select: { pageViews: true, likes: true } },
       },
     }),
     prisma.tag.findMany({

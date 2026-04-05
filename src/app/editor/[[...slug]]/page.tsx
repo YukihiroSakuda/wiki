@@ -4,18 +4,28 @@ import { PageEditorForm } from "@/components/editor/page-editor-form";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: { slug: string };
+  params: { slug?: string[] };
 }
 
-export default async function EditPage({ params }: Props) {
+export default async function EditorPage({ params }: Props) {
+  const slug = params.slug?.[0];
+
+  if (!slug) {
+    return (
+      <MainLayout fullHeight>
+        <div className="flex h-full flex-col">
+          <PageEditorForm isNew />
+        </div>
+      </MainLayout>
+    );
+  }
+
   const page = await prisma.page.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: { tags: { include: { tag: true } } },
   });
 
   if (!page) notFound();
-
-  const initialTags = page.tags.map((pt) => pt.tag.name);
 
   return (
     <MainLayout fullHeight>
@@ -24,7 +34,7 @@ export default async function EditPage({ params }: Props) {
           slug={page.slug}
           initialTitle={page.title}
           initialContent={page.content}
-          initialTags={initialTags}
+          initialTags={page.tags.map((pt) => pt.tag.name)}
         />
       </div>
     </MainLayout>

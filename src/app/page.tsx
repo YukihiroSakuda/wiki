@@ -47,7 +47,7 @@ export default async function DashboardPage() {
             Dashboard
           </h1>
           <Link
-            href="/new"
+            href="/editor"
             className="font-mono text-sm text-[var(--color-accent)] hover:underline"
           >
             + New Page
@@ -91,9 +91,17 @@ export default async function DashboardPage() {
 
         {/* Frequently Viewed */}
         <section>
-          <h2 className="mb-3 text-sm uppercase tracking-widest text-[var(--color-text-secondary)]">
-            Frequently Viewed
-          </h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm uppercase tracking-widest text-[var(--color-text-secondary)]">
+              Frequently Viewed
+            </h2>
+            <Link
+              href="/ranking"
+              className="font-mono text-sm text-[var(--color-accent)] hover:underline"
+            >
+              Full Ranking →
+            </Link>
+          </div>
           <div className="divide-y divide-[var(--color-border)] rounded border border-[var(--color-border)]">
             {popularPages.filter((p) => p._count.pageViews > 0).length === 0 ? (
               <p className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">No views yet.</p>

@@ -1,11 +1,15 @@
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { MainLayout } from "@/components/layout/main-layout";
 import { PageContent } from "@/components/page-view/page-content";
+import { PageViewTracker } from "@/components/page-view/page-view-tracker";
+import { LikeButton } from "@/components/page-view/like-button";
 import { RightSidebar } from "@/components/layout/right-sidebar";
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Edit, Clock, User } from "lucide-react";
+import { Edit, Clock, User, Eye } from "lucide-react";
 
 interface Props {
   params: { slug: string };
@@ -21,6 +25,7 @@ async function getPage(slug: string) {
       incomingLinks: {
         include: { sourcePage: { select: { slug: true, title: true } } },
       },
+      _count: { select: { pageViews: true, likes: true } },
     },
   });
 }
@@ -43,9 +48,18 @@ function extractToc(content: string) {
 }
 
 export default async function PageViewPage({ params }: Props) {
-  const page = await getPage(params.slug);
+  const [page, session] = await Promise.all([getPage(params.slug), getServerSession(authOptions)]);
 
   if (!page) notFound();
+
+  let isLikedByMe = false;
+  if (session?.user?.id) {
+    const like = await prisma.pageLike.findUnique({
+      where: { pageId_userId: { pageId: page.id, userId: session.user.id } },
+      select: { userId: true },
+    });
+    isLikedByMe = !!like;
+  }
 
   const toc = extractToc(page.content);
   const backlinks = page.incomingLinks.map((l) => ({
@@ -72,7 +86,7 @@ export default async function PageViewPage({ params }: Props) {
               {page.title}
             </h1>
             <Link
-              href={`/wiki/${page.slug}/edit`}
+              href={`/editor/${page.slug}`}
               className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded border border-[var(--color-border)] px-2 py-1 text-sm text-[var(--color-text-secondary)] transition-colors duration-150 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
               <Edit size={12} />
@@ -93,6 +107,15 @@ export default async function PageViewPage({ params }: Props) {
                 day: "numeric",
               })}
             </span>
+            <span className="flex items-center gap-1">
+              <Eye size={11} />
+              {page._count.pageViews}
+            </span>
+            <LikeButton
+              slug={page.slug}
+              initialLiked={isLikedByMe}
+              initialCount={page._count.likes}
+            />
             <Link
               href={`/wiki/${page.slug}/history`}
               className="transition-colors duration-150 hover:text-[var(--color-accent)]"
@@ -111,6 +134,8 @@ export default async function PageViewPage({ params }: Props) {
             </div>
           )}
         </header>
+
+        <PageViewTracker slug={page.slug} />
 
         {/* Page content */}
         <PageContent content={page.content} />
