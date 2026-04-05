@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils";
 import { Header } from "./header";
 import { LeftSidebar } from "./left-sidebar";
 import { RightSidebar } from "./right-sidebar";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { env } from "@/lib/env";
+import { useLayoutStore } from "@/stores/layout-store";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -21,13 +22,11 @@ export function MainLayout({
   rightSidebarProps,
   fullHeight = false,
 }: MainLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { sidebarOpen, setSidebarOpen, toggleSidebar, initialize } = useLayoutStore();
 
   useEffect(() => {
-    setSidebarOpen(window.innerWidth >= 768);
-  }, []);
-
-  const toggleSidebar = () => setSidebarOpen((v) => !v);
+    initialize();
+  }, [initialize]);
 
   return (
     <div

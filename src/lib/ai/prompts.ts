@@ -55,6 +55,77 @@ Text:
 ${selectedText}
 `.trim(),
 
+  documentPagesVision: (
+    filename: string,
+    fileType: string,
+    pageStart: number,
+    pageEnd: number,
+    totalPages: number
+  ) =>
+    `
+You are converting a ${fileType} document to Markdown.
+File: "${filename}" — showing pages ${pageStart}–${pageEnd} of ${totalPages}.
+
+For every page, extract ALL content:
+- Text: use ## / ### for headings, preserve paragraphs and lists
+- Tables: convert to Markdown table syntax (| col | col |)
+- Charts / diagrams: describe as ![description of chart](chart)
+- Photos / illustrations: describe as ![description](image)
+- Code: wrap in fenced code blocks
+
+Separate pages with "---".
+Output only Markdown. No preamble, no explanation.
+`.trim(),
+
+  documentWithImagesVision: (filename: string, fileType: string, extractedText: string) =>
+    `
+You are converting a ${fileType} document to Markdown.
+File: "${filename}"
+
+The text content extracted from the document is shown below.
+Embedded images from the document are attached as images.
+
+For each embedded image, insert a Markdown image tag with a descriptive alt text at the most appropriate location:
+  ![descriptive alt text](image)
+
+Convert the text to clean Markdown (headings, lists, tables).
+Integrate the image descriptions naturally within the Markdown content.
+Output only Markdown. No preamble, no explanation.
+
+--- Extracted text ---
+${extractedText.substring(0, 8000)}
+`.trim(),
+
+  fileToMarkdown: (filename: string, fileType: string, extractedText: string) =>
+    `
+You are a technical documentation assistant. Convert the following extracted content from a ${fileType} file ("${filename}") into clean, well-structured Markdown.
+
+Rules:
+- Use appropriate Markdown headings (##, ###) to reflect the document structure
+- Convert tables to Markdown table syntax
+- Convert lists to Markdown lists
+- Preserve all important data and text
+- For spreadsheets, format each sheet as a separate section with a heading
+- For presentations, format each slide as a section
+- Remove headers/footers/page numbers if present
+- Output only the Markdown, no preamble
+
+Extracted content:
+${extractedText.substring(0, 12000)}
+`.trim(),
+
+  imageDescription: (filename: string) =>
+    `
+You are a technical documentation assistant. Analyze this image ("${filename}") and provide:
+1. A concise alt text (one sentence, max 100 chars) describing what the image shows
+2. A detailed Markdown description of the image content (diagrams, charts, screenshots, photos, etc.)
+
+Format your response exactly as:
+ALT: <alt text here>
+DESCRIPTION:
+<markdown description here>
+`.trim(),
+
   proofread: (title: string, content: string) =>
     `
 You are a professional technical writer and editor for an internal company wiki.

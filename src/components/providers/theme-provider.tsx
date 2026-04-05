@@ -4,7 +4,7 @@ import { useThemeStore } from "@/stores/theme-store";
 import { useEffect } from "react";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { theme, getAccentColor } = useThemeStore();
+  const { theme, accentColorName, getAccentColor } = useThemeStore();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -20,7 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const accent = getAccentColor();
     root.style.setProperty("--color-accent", accent.value);
     root.style.setProperty("--color-accent-hover", accent.hover);
-  }, [theme, getAccentColor]);
+  }, [theme, accentColorName, getAccentColor]);
 
   return <>{children}</>;
 }

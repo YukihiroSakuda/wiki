@@ -27,16 +27,17 @@ export function TagInput({
   const fetchRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (!inputVal.trim()) {
-      setSuggestions([]);
-      return;
-    }
+    if (!focused) return;
 
     if (fetchRef.current) fetchRef.current.abort();
     const ctrl = new AbortController();
     fetchRef.current = ctrl;
 
-    fetch(`/api/tags?q=${encodeURIComponent(inputVal.trim())}`, { signal: ctrl.signal })
+    const url = inputVal.trim()
+      ? `/api/tags?q=${encodeURIComponent(inputVal.trim())}`
+      : `/api/tags`;
+
+    fetch(url, { signal: ctrl.signal })
       .then((r) => r.json())
       .then((data) => {
         if (!ctrl.signal.aborted) {
@@ -51,7 +52,7 @@ export function TagInput({
       .catch(() => {});
 
     return () => ctrl.abort();
-  }, [inputVal, value]);
+  }, [inputVal, value, focused]);
 
   function addTag(tag: string) {
     const normalized = tag.trim().toLowerCase().replace(/\s+/g, "-");
@@ -112,7 +113,7 @@ export function TagInput({
             onKeyDown={handleKeyDown}
             onFocus={() => {
               setFocused(true);
-              if (suggestions.length > 0) setShowSuggestions(true);
+              setShowSuggestions(true);
             }}
             onBlur={() => {
               setFocused(false);
@@ -146,8 +147,8 @@ export function TagInput({
         )}
       </div>
 
-      {/* Hint — shown when focused and no suggestions */}
-      {focused && !showSuggestions && (
+      {/* Hint — shown when focused, no suggestions, and has typed text */}
+      {focused && !showSuggestions && inputVal.trim().length > 0 && (
         <p className="mt-1 font-mono text-xs text-[var(--color-text-muted)]">
           入力後に{" "}
           <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">

@@ -1,8 +1,7 @@
 "use client";
 
-import { useThemeStore } from "@/stores/theme-store";
 import { cn } from "@/lib/utils";
-import { Menu, Moon, Settings, Sun, Search, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -19,7 +18,6 @@ interface QuickResult {
 }
 
 export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderProps) {
-  const { theme, toggleTheme } = useThemeStore();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<QuickResult[]>([]);
   const [open, setOpen] = useState(false);
@@ -129,7 +127,7 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
       </Link>
 
       {/* Search bar */}
-      <div className="relative flex-1 max-w-xl">
+      <div className="relative max-w-xl flex-1">
         <form onSubmit={handleSearch}>
           <div className="relative flex items-center">
             <Search
@@ -211,26 +209,6 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
             </Link>
           </div>
         )}
-      </div>
-
-      <div className="ml-auto flex items-center gap-1">
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="cursor-pointer rounded p-1 text-[var(--color-text-secondary)] transition-colors duration-150 hover:bg-[var(--color-bg-sidebar)] hover:text-[var(--color-text-primary)]"
-          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-        </button>
-
-        {/* Settings */}
-        <Link
-          href="/settings"
-          className="rounded p-1 text-[var(--color-text-secondary)] transition-colors duration-150 hover:bg-[var(--color-bg-sidebar)] hover:text-[var(--color-text-primary)]"
-          aria-label="Settings"
-        >
-          <Settings size={14} />
-        </Link>
       </div>
     </header>
   );

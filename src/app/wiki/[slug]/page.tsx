@@ -64,7 +64,7 @@ export default async function PageViewPage({ params }: Props) {
         pageSlug: page.slug,
       }}
     >
-      <article className="max-w-3xl">
+      <article className="w-full">
         {/* Page header */}
         <header className="mb-6 border-b border-[var(--color-border)] pb-4">
           <div className="flex items-start justify-between gap-4">

@@ -15,7 +15,11 @@ const nextConfig = {
 
   // Prisma needs these to be available server-side (Next.js 14 option)
   experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "@prisma/adapter-libsql", "@libsql/client"],
+    serverComponentsExternalPackages: [
+      "@prisma/client", "@prisma/adapter-libsql", "@libsql/client",
+      "pdfjs-dist", "@napi-rs/canvas", "adm-zip",
+      "mammoth", "officeparser", "pdf-parse", "xlsx",
+    ],
   },
 };
 

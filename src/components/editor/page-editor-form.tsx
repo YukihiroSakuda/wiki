@@ -239,14 +239,6 @@ export function PageEditorForm({
         />
       </div>
 
-      {/* ── Hint ── */}
-      <p className="font-mono text-xs text-[var(--color-text-muted)]">
-        <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">[[</kbd>{" "}
-        でページリンク ·{" "}
-        <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">Tab</kbd>{" "}
-        でインデント · テキスト選択後 B / I / code ボタンで書式適用
-      </p>
-
       {/* ── Proofread dialog ── */}
       <ProofreadDialog
         open={proofreadOpen}

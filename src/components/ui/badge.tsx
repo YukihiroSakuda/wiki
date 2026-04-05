@@ -13,7 +13,7 @@ export function Badge({ children, className, onClick, removable, onRemove }: Bad
   return (
     <span
       className={cn(
-        "group inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-sm",
+        "group inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-sm",
         "bg-[var(--color-bg-sidebar)] text-[var(--color-text-secondary)]",
         "border border-[var(--color-border)]",
         onClick &&

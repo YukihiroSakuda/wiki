@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { FileText, Hash, Home, MessageSquare, Plus, Settings } from "lucide-react";
+import { FileText, Home, MessageSquare, Plus, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,7 +12,6 @@ interface LeftSidebarProps {
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/pages", label: "All Pages", icon: FileText },
-  { href: "/tags", label: "Tags", icon: Hash },
   { href: "/chat", label: "AI Chat", icon: MessageSquare },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
