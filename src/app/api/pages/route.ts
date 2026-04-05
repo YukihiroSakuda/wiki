@@ -14,10 +14,25 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(searchParams.get("limit") ?? "20");
   const offset = parseInt(searchParams.get("offset") ?? "0");
 
+  const tags = searchParams.get("tags"); // comma-separated, OR filter
+  const tagList = tags
+    ? tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : [];
+
   try {
+    const tagFilter =
+      tagList.length > 0
+        ? { OR: tagList.map((name) => ({ tags: { some: { tag: { name } } } })) }
+        : tag
+          ? { tags: { some: { tag: { name: tag } } } }
+          : {};
+
     const where = {
-      ...(tag ? { tags: { some: { tag: { name: tag } } } } : {}),
-      ...(q ? { title: { contains: q } } : {}),
+      ...tagFilter,
+      ...(q ? { OR: [{ title: { contains: q } }, { content: { contains: q } }] } : {}),
     };
 
     const [pages, total] = await Promise.all([

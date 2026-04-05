@@ -9,23 +9,29 @@ interface BadgeProps {
 }
 
 export function Badge({ children, className, onClick, removable, onRemove }: BadgeProps) {
+  const hasRemove = removable || !!onRemove;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-sm font-mono",
+        "group inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-sm",
         "bg-[var(--color-bg-sidebar)] text-[var(--color-text-secondary)]",
         "border border-[var(--color-border)]",
-        onClick && "cursor-pointer hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors duration-150",
+        onClick &&
+          "cursor-pointer transition-colors duration-150 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
         className
       )}
       onClick={onClick}
     >
       {children}
-      {removable && (
+      {hasRemove && (
         <button
-          onClick={(e) => { e.stopPropagation(); onRemove?.(); }}
-          className="ml-0.5 hover:text-[var(--color-text-primary)] cursor-pointer"
-          aria-label="Remove tag"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove?.();
+          }}
+          className="ml-0.5 cursor-pointer opacity-0 transition-opacity duration-100 hover:text-[var(--color-text-primary)] group-hover:opacity-100"
+          aria-label="Remove"
         >
           ×
         </button>

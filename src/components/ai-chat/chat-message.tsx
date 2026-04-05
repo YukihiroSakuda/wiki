@@ -1,14 +1,15 @@
 import { cn } from "@/lib/utils";
 import { type ChatMessage } from "@/stores/chat-store";
-import Link from "next/link";
 import { FileText, Sparkles } from "lucide-react";
 
 interface ChatMessageProps {
   message: ChatMessage;
   isStreaming?: boolean;
+  /** When provided, source links call this instead of navigating */
+  onOpenPage?: (slug: string, title: string) => void;
 }
 
-export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
+export function ChatMessageBubble({ message, isStreaming, onOpenPage }: ChatMessageProps) {
   const isUser = message.role === "user";
 
   return (
@@ -41,16 +42,28 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
       {/* Sources */}
       {message.sources && message.sources.length > 0 && (
         <div className="flex flex-wrap gap-1 px-1">
-          {message.sources.map((s) => (
-            <Link
-              key={s.slug}
-              href={`/wiki/${s.slug}`}
-              className="flex items-center gap-1 rounded border border-[var(--color-border)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-text-secondary)] transition-colors duration-100 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
-            >
-              <FileText size={9} />
-              {s.title}
-            </Link>
-          ))}
+          {message.sources.map((s) =>
+            onOpenPage ? (
+              <button
+                key={s.slug}
+                type="button"
+                onClick={() => onOpenPage(s.slug, s.title)}
+                className="flex items-center gap-1 rounded border border-[var(--color-border)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-text-secondary)] transition-colors duration-100 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+              >
+                <FileText size={9} />
+                {s.title}
+              </button>
+            ) : (
+              <a
+                key={s.slug}
+                href={`/wiki/${s.slug}`}
+                className="flex items-center gap-1 rounded border border-[var(--color-border)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-text-secondary)] transition-colors duration-100 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+              >
+                <FileText size={9} />
+                {s.title}
+              </a>
+            )
+          )}
         </div>
       )}
     </div>

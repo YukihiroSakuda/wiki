@@ -55,7 +55,7 @@ export function MainLayout({
           "pt-10 transition-all duration-200 sm:transition-[margin]",
           sidebarOpen ? "sm:ml-52" : "sm:ml-0",
           showRightSidebar ? "sm:mr-60" : "sm:mr-0",
-          fullHeight && "flex h-[calc(100vh-2.5rem)] flex-col"
+          fullHeight && "flex h-screen flex-col"
         )}
       >
         {fullHeight ? (

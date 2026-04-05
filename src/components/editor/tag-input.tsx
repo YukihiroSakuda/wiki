@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Plus } from "lucide-react";
 
 interface TagInputProps {
   value: string[];
@@ -11,11 +12,17 @@ interface TagInputProps {
   maxTags?: number;
 }
 
-export function TagInput({ value, onChange, placeholder = "Add tag...", maxTags = 10 }: TagInputProps) {
+export function TagInput({
+  value,
+  onChange,
+  placeholder: _placeholder,
+  maxTags = 10,
+}: TagInputProps) {
   const [inputVal, setInputVal] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
+  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fetchRef = useRef<AbortController | null>(null);
 
@@ -76,18 +83,18 @@ export function TagInput({ value, onChange, placeholder = "Add tag...", maxTags 
       setActiveIdx((i) => Math.max(i - 1, -1));
     } else if (e.key === "Escape") {
       setShowSuggestions(false);
-    } else if (e.key === "Backspace" && inputVal === "" && value.length > 0) {
-      removeTag(value[value.length - 1]);
     }
   }
+
+  const canAdd = inputVal.trim().length > 0 && value.length < maxTags;
 
   return (
     <div className="relative">
       <div
         className={cn(
-          "flex flex-wrap items-center gap-1 min-h-9 px-2 py-1",
-          "border border-[var(--color-border)] rounded bg-[var(--color-bg-primary)]",
-          "focus-within:border-[var(--color-accent)] transition-colors duration-150"
+          "flex min-h-9 flex-wrap items-center gap-1 px-2 py-1",
+          "rounded border border-[var(--color-border)] bg-[var(--color-bg-primary)]",
+          "cursor-text transition-colors duration-150 focus-within:border-[var(--color-accent)]"
         )}
         onClick={() => inputRef.current?.focus()}
       >
@@ -103,25 +110,63 @@ export function TagInput({ value, onChange, placeholder = "Add tag...", maxTags 
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-            placeholder={value.length === 0 ? placeholder : ""}
+            onFocus={() => {
+              setFocused(true);
+              if (suggestions.length > 0) setShowSuggestions(true);
+            }}
+            onBlur={() => {
+              setFocused(false);
+              setTimeout(() => setShowSuggestions(false), 150);
+            }}
+            placeholder={value.length === 0 ? "タグを入力…" : "タグを追加…"}
             className={cn(
-              "flex-1 min-w-20 outline-none bg-transparent text-sm font-mono",
+              "min-w-28 flex-1 bg-transparent font-mono text-sm outline-none",
               "text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
             )}
           />
         )}
+        {/* + button — visible when there is text to commit */}
+        {canAdd && (
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              addTag(inputVal);
+            }}
+            className={cn(
+              "flex items-center gap-0.5 rounded px-1.5 py-0.5",
+              "font-mono text-xs text-[var(--color-accent)]",
+              "transition-colors duration-100 hover:bg-[var(--color-bg-hover)]"
+            )}
+            title="追加 (Enter)"
+          >
+            <Plus size={11} />
+            追加
+          </button>
+        )}
       </div>
 
+      {/* Hint — shown when focused and no suggestions */}
+      {focused && !showSuggestions && (
+        <p className="mt-1 font-mono text-xs text-[var(--color-text-muted)]">
+          入力後に{" "}
+          <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">
+            Enter
+          </kbd>{" "}
+          または{" "}
+          <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">,</kbd>{" "}
+          で追加
+        </p>
+      )}
+
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 z-50 w-full mt-0.5 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded shadow-md py-0.5">
+        <div className="absolute left-0 top-full z-50 mt-0.5 w-full rounded border border-[var(--color-border)] bg-[var(--color-bg-primary)] py-0.5 shadow-md">
           {suggestions.map((s, i) => (
             <button
               key={s}
               type="button"
               className={cn(
-                "w-full text-left px-3 py-1.5 text-xs font-mono truncate transition-colors duration-100",
+                "w-full truncate px-3 py-1.5 text-left font-mono text-xs transition-colors duration-100",
                 i === activeIdx
                   ? "bg-[var(--color-accent)] text-white"
                   : "text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]"

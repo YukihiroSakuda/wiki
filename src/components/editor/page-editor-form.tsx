@@ -8,8 +8,9 @@ import { TagInput } from "./tag-input";
 import { AIAssistToolbar } from "./ai-assist-toolbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ProofreadDialog } from "./proofread-dialog";
 import { cn } from "@/lib/utils";
-import { Save, Trash2, AlertCircle, Sparkles } from "lucide-react";
+import { Save, Trash2, AlertCircle, Sparkles, ScanText } from "lucide-react";
 
 interface PageEditorFormProps {
   slug?: string;
@@ -35,6 +36,7 @@ export function PageEditorForm({
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [suggestingTags, setSuggestingTags] = useState(false);
+  const [proofreadOpen, setProofreadOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSuggestTags = async () => {
@@ -53,7 +55,10 @@ export function PageEditorForm({
   };
 
   const handleSave = async () => {
-    if (!title.trim()) { setError("タイトルを入力してください。"); return; }
+    if (!title.trim()) {
+      setError("タイトルを入力してください。");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -64,7 +69,10 @@ export function PageEditorForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        if (!res.ok) { const d = await res.json(); throw new Error(d.error ?? "作成に失敗しました。"); }
+        if (!res.ok) {
+          const d = await res.json();
+          throw new Error(d.error ?? "作成に失敗しました。");
+        }
         const page = await res.json();
         router.push(`/wiki/${page.slug}`);
       } else {
@@ -73,7 +81,10 @@ export function PageEditorForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        if (!res.ok) { const d = await res.json(); throw new Error(d.error ?? "保存に失敗しました。"); }
+        if (!res.ok) {
+          const d = await res.json();
+          throw new Error(d.error ?? "保存に失敗しました。");
+        }
         const page = await res.json();
         router.push(`/wiki/${page.slug}`);
         router.refresh();
@@ -86,7 +97,10 @@ export function PageEditorForm({
   };
 
   const handleDelete = async () => {
-    if (!confirmDelete) { setConfirmDelete(true); return; }
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
     setDeleting(true);
     setError(null);
     try {
@@ -122,9 +136,21 @@ export function PageEditorForm({
           onChange={(e) => setTitle(e.target.value)}
           placeholder="ページタイトル"
           className="h-9 flex-1 font-mono text-base font-bold"
-          onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
         />
         <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setProofreadOpen(true)}
+            disabled={saving || deleting}
+            className="flex items-center gap-1 rounded px-2 py-1 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-accent)] disabled:opacity-50"
+            title="AIによる文章・マークダウン校正"
+          >
+            <ScanText size={12} />
+            校正
+          </button>
           <Button
             variant="primary"
             size="md"
@@ -215,10 +241,23 @@ export function PageEditorForm({
 
       {/* ── Hint ── */}
       <p className="font-mono text-xs text-[var(--color-text-muted)]">
-        <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">[[</kbd> でページリンク ·{" "}
-        <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">Tab</kbd> でインデント ·{" "}
-        テキスト選択後 B / I / code ボタンで書式適用
+        <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">[[</kbd>{" "}
+        でページリンク ·{" "}
+        <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">Tab</kbd>{" "}
+        でインデント · テキスト選択後 B / I / code ボタンで書式適用
       </p>
+
+      {/* ── Proofread dialog ── */}
+      <ProofreadDialog
+        open={proofreadOpen}
+        onClose={() => setProofreadOpen(false)}
+        currentTitle={title}
+        currentContent={content}
+        onApply={(newTitle, newContent) => {
+          setTitle(newTitle);
+          setContent(newContent);
+        }}
+      />
     </div>
   );
 }
