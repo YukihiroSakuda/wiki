@@ -18,25 +18,29 @@ interface PreviewPage {
 }
 
 function PanelPagePreview({
-  slug,
-  title,
+  slug: initialSlug,
+  title: initialTitle,
+  pageMap,
   onBack,
 }: {
   slug: string;
   title: string;
+  pageMap: Record<string, string>;
   onBack: () => void;
 }) {
+  const [currentSlug, setCurrentSlug] = useState(initialSlug);
   const [page, setPage] = useState<PreviewPage | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/pages/${slug}`)
+    setPage(null);
+    fetch(`/api/pages/${currentSlug}`)
       .then((r) => r.json())
       .then((d) => setPage({ slug: d.slug, title: d.title, content: d.content }))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [currentSlug]);
 
   return (
     <>
@@ -51,10 +55,10 @@ function PanelPagePreview({
           <ChevronLeft size={14} />
         </button>
         <span className="flex-1 truncate font-mono text-sm font-medium text-[var(--color-text-primary)]">
-          {title}
+          {page?.title ?? initialTitle}
         </span>
         <a
-          href={`/wiki/${slug}`}
+          href={`/wiki/${currentSlug}`}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded p-1 text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-accent)]"
@@ -70,7 +74,11 @@ function PanelPagePreview({
             <Spinner size="md" />
           </div>
         ) : page ? (
-          <PageContent content={page.content} />
+          <PageContent
+            content={page.content}
+            pageMap={pageMap}
+            onWikiLinkClick={(slug) => setCurrentSlug(slug)}
+          />
         ) : (
           <p className="font-mono text-sm text-[var(--color-text-muted)]">
             ページを読み込めませんでした。
@@ -84,14 +92,31 @@ function PanelPagePreview({
 // ─── Main panel ──────────────────────────────────────────────────────────────
 
 export function ChatPanel() {
-  const { isOpen, close, messages, addMessage, updateMessage, clear, pendingInput, setPendingInput } =
-    useChatStore();
+  const {
+    isOpen,
+    close,
+    messages,
+    addMessage,
+    updateMessage,
+    clear,
+    pendingInput,
+    setPendingInput,
+  } = useChatStore();
   const [input, setInput] = useState("");
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ slug: string; title: string } | null>(null);
+  const [pageMap, setPageMap] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Fetch title→slug map once on mount for wiki link resolution
+  useEffect(() => {
+    fetch("/api/pages/map")
+      .then((r) => r.json())
+      .then((map: Record<string, string>) => setPageMap(map))
+      .catch(() => {});
+  }, []);
 
   // Consume pending input
   useEffect(() => {
@@ -168,7 +193,11 @@ export function ChatPanel() {
           if (idx !== -1) {
             const textPart = full.substring(0, idx);
             const sourcePart = full.substring(idx + sourceMarker.length);
-            try { sources = JSON.parse(sourcePart.trim()); } catch { /* ignore */ }
+            try {
+              sources = JSON.parse(sourcePart.trim());
+            } catch {
+              /* ignore */
+            }
             accumulated = textPart;
             updateMessage(assistantId, accumulated, sources);
             break;
@@ -199,9 +228,7 @@ export function ChatPanel() {
   return (
     <>
       {/* Mobile backdrop */}
-      {isOpen && (
-        <div className="fixed inset-0 z-40 bg-black/20 sm:hidden" onClick={close} />
-      )}
+      {isOpen && <div className="fixed inset-0 z-40 bg-black/20 sm:hidden" onClick={close} />}
 
       {/* Panel */}
       <div
@@ -210,7 +237,7 @@ export function ChatPanel() {
           "border-l border-t border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-xl",
           "transition-transform duration-300",
           "w-full sm:w-96",
-          "h-[70vh] sm:h-[calc(100vh-40px)] sm:top-10",
+          "h-[70vh] sm:top-10 sm:h-[calc(100vh-40px)]",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
@@ -219,6 +246,7 @@ export function ChatPanel() {
           <PanelPagePreview
             slug={preview.slug}
             title={preview.title}
+            pageMap={pageMap}
             onBack={() => setPreview(null)}
           />
         ) : (
@@ -299,7 +327,7 @@ export function ChatPanel() {
                   onClick={sendMessage}
                   disabled={!input.trim() || !!streamingId}
                   className={cn(
-                    "flex h-9 w-9 shrink-0 self-end items-center justify-center rounded",
+                    "flex h-9 w-9 shrink-0 items-center justify-center self-end rounded",
                     "bg-[var(--color-accent)] text-white transition-colors duration-150",
                     "hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-40"
                   )}
