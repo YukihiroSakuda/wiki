@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Sparkles, PlayCircle, RefreshCw, Languages, Check, X, Loader } from "lucide-react";
+import { toast } from "@/stores/toast-store";
 
 type Mode = "idle" | "continue" | "rewrite" | "translate";
 type DiffState = "none" | "preview" | "accepted";
@@ -130,6 +131,7 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
     } catch (err: unknown) {
       if (err instanceof Error && err.name !== "AbortError") {
         setStreamedText("[Error: AI request failed]");
+        toast.error("AIアシスト失敗");
       }
     } finally {
       setStreaming(false);
@@ -175,6 +177,8 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
     setDiffState("accepted");
     setVisible(false);
     setStreamedText("");
+    const label = mode === "continue" ? "続きを生成" : mode === "rewrite" ? "書き換え" : "翻訳";
+    toast.success(`${label}を適用しました`);
   }
 
   function handleReject() {
@@ -194,11 +198,11 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
         ref={toolbarRef}
         className={cn(
           "fixed z-50 flex items-center gap-0.5 px-1.5 py-1",
-          "bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded shadow-md"
+          "rounded border border-[var(--color-border)] bg-[var(--color-bg-surface)] shadow-md"
         )}
         style={{ top: position.top, left: position.left }}
       >
-        <span className="flex items-center gap-1 px-1 text-xs text-[var(--color-text-muted)] border-r border-[var(--color-border)] mr-1 pr-2">
+        <span className="mr-1 flex items-center gap-1 border-r border-[var(--color-border)] px-1 pr-2 text-xs text-[var(--color-text-muted)]">
           <Sparkles size={11} className="text-[var(--color-accent)]" />
           AI
         </span>
@@ -225,12 +229,12 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
                 disabled={streaming}
               />
               {showLangs && (
-                <div className="absolute top-full left-0 mt-0.5 z-50 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded shadow-md py-0.5 min-w-24">
+                <div className="absolute left-0 top-full z-50 mt-0.5 min-w-24 rounded border border-[var(--color-border)] bg-[var(--color-bg-primary)] py-0.5 shadow-md">
                   {LANGS.map((l) => (
                     <button
                       key={l.code}
                       type="button"
-                      className="w-full text-left px-3 py-1 text-xs font-mono text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)] transition-colors duration-100"
+                      className="w-full px-3 py-1 text-left font-mono text-xs text-[var(--color-text-primary)] transition-colors duration-100 hover:bg-[var(--color-bg-hover)]"
                       onClick={() => handleTranslate(l.code)}
                     >
                       {l.label}
@@ -242,7 +246,9 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
           </>
         ) : (
           <>
-            {streaming && <Loader size={12} className="animate-spin text-[var(--color-accent)] mx-1" />}
+            {streaming && (
+              <Loader size={12} className="mx-1 animate-spin text-[var(--color-accent)]" />
+            )}
             {!streaming && (
               <>
                 <ToolbarBtn
@@ -267,13 +273,13 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
       {diffState === "preview" && streamedText && (
         <div
           className={cn(
-            "fixed z-40 max-w-lg max-h-48 overflow-auto",
-            "bg-[var(--color-bg-surface)] border border-[var(--color-accent)] rounded shadow-lg p-3",
-            "text-sm font-mono text-[var(--color-text-primary)]"
+            "fixed z-40 max-h-48 max-w-lg overflow-auto",
+            "rounded border border-[var(--color-accent)] bg-[var(--color-bg-surface)] p-3 shadow-lg",
+            "font-mono text-sm text-[var(--color-text-primary)]"
           )}
           style={{ top: position.top + 38, left: position.left }}
         >
-          <p className="text-xs text-[var(--color-text-muted)] mb-1.5 uppercase tracking-wider">
+          <p className="mb-1.5 text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
             {mode === "continue" ? "Continuation" : mode === "rewrite" ? "Rewrite" : "Translation"}
             {streaming && " — streaming..."}
           </p>
@@ -304,9 +310,9 @@ function ToolbarBtn({
       disabled={disabled}
       title={label}
       className={cn(
-        "flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-mono",
-        "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]",
-        "transition-colors duration-100 disabled:opacity-40 disabled:cursor-not-allowed",
+        "flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-xs",
+        "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)]",
+        "transition-colors duration-100 disabled:cursor-not-allowed disabled:opacity-40",
         className
       )}
     >

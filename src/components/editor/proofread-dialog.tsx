@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { X, Check, RefreshCw, Sparkles, AlertCircle } from "lucide-react";
+import { toast } from "@/stores/toast-store";
 
 // ─── Diff types ──────────────────────────────────────────────────────────────
 
@@ -290,8 +291,10 @@ export function ProofreadDialog({
       })
       .catch((err: unknown) => {
         if (err instanceof Error && err.name === "AbortError") return;
-        setError(err instanceof Error ? err.message : "エラーが発生しました。");
+        const msg = err instanceof Error ? err.message : "エラーが発生しました。";
+        setError(msg);
         setPhase("error");
+        toast.error(`AI校正に失敗: ${msg}`);
       });
 
     return () => ctrl.abort();
@@ -316,6 +319,7 @@ export function ProofreadDialog({
   function handleApply() {
     const titleToApply = applyTitle ? newTitle : currentTitle;
     onApply(titleToApply, newContent);
+    toast.success("AI校正を適用しました");
     onClose();
   }
 

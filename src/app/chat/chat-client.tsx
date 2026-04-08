@@ -209,38 +209,59 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] gap-3">
+    <div className="flex h-full min-h-0 gap-3">
       {/* ── Main chat column ── */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Header */}
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-[var(--color-accent)]" />
-            <h1 className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">
-              AI Chat
-            </h1>
+        {/* HUD Header */}
+        <div className="mb-3 flex items-center justify-between rounded border border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] px-3 py-2 shadow-[0_0_20px_var(--color-accent-glow)]">
+          <div className="flex items-center gap-2 font-mono">
+            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-accent)] shadow-[0_0_6px_var(--color-accent-glow)]" />
+            <Sparkles size={13} className="text-[var(--color-accent)]" />
+            <span className="text-[13px] font-bold text-[var(--color-text-primary)]">
+              <span className="text-[var(--color-accent)]">$</span> ai-chat
+            </span>
+            <span className="text-[10px] text-[var(--color-text-dim)]">·</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">claude-sonnet</span>
+            <span className="text-[10px] text-[var(--color-text-dim)]">·</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">RAG: azure-search</span>
+            <span className="text-[10px] text-[var(--color-text-dim)]">·</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">
+              msgs: {messages.length}
+            </span>
           </div>
           <button
             type="button"
             onClick={clear}
-            className="flex items-center gap-1.5 rounded border border-[var(--color-border)] px-2 py-1 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:border-red-400 hover:text-red-500"
+            className="flex items-center gap-1.5 rounded border border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] px-2.5 py-1 font-mono text-[11px] font-bold text-[var(--color-text-secondary)] transition-colors duration-100 hover:border-[#FF5C7A] hover:bg-[#FF5C7A]/10 hover:text-[#FF5C7A]"
             title="会話をクリア"
           >
-            <Trash2 size={11} />
-            クリア
+            <Trash2 size={10} />
+            :clear
           </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto rounded border border-[var(--color-border)] bg-[var(--color-bg-surface)] p-4">
+        <div className="relative flex-1 overflow-y-auto rounded border border-[var(--color-border)] bg-[var(--color-bg-surface)] p-4">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--color-accent) 1px, transparent 1px), linear-gradient(90deg, var(--color-accent) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
           {messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-              <Sparkles size={28} className="text-[var(--color-accent)] opacity-60" />
-              <p className="font-mono text-sm text-[var(--color-text-secondary)]">
-                Wikiについて何でも聞いてください。
+            <div className="relative flex h-full flex-col items-center justify-center gap-2 text-center font-mono">
+              <Sparkles
+                size={28}
+                className="text-[var(--color-accent)] opacity-60 [filter:drop-shadow(0_0_8px_var(--color-accent-glow))]"
+              />
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                <span className="text-[var(--color-accent)]">❯</span>{" "}
+                wikiについて何でも聞いてください
               </p>
-              <p className="font-mono text-xs text-[var(--color-text-muted)]">
-                Powered by Claude + Azure AI Search
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+                [ claude · azure-search · ready ]
               </p>
             </div>
           ) : (
@@ -260,18 +281,26 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
 
         {/* Input */}
         <div className="mt-3">
-          <div className="flex items-end gap-2">
+          <div
+            className={cn(
+              "flex items-end gap-2 rounded border px-2 py-1",
+              "border-[var(--color-border)] bg-[var(--color-bg-primary)]",
+              "transition-all focus-within:border-[var(--color-accent)]",
+              "focus-within:shadow-[0_0_15px_var(--color-accent-glow)]"
+            )}
+          >
+            <span className="self-end pb-2 font-mono text-sm font-bold text-[var(--color-accent)]">
+              ❯
+            </span>
             <AutoResizeTextarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="質問を入力... (Enter で送信、Shift+Enter で改行)"
+              placeholder="ask wiki --query ... (Enter送信 / Shift+Enter改行)"
               className={cn(
-                "flex-1 rounded border border-[var(--color-border)] px-3 py-2",
-                "bg-[var(--color-bg-primary)] font-mono text-sm text-[var(--color-text-primary)]",
-                "outline-none transition-colors duration-150 placeholder:text-[var(--color-text-muted)]",
-                "focus:border-[var(--color-accent)]"
+                "flex-1 bg-transparent px-1 py-1.5 font-mono text-sm text-[var(--color-text-primary)]",
+                "outline-none placeholder:text-[var(--color-text-dim)]"
               )}
             />
             <button
@@ -279,12 +308,15 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
               onClick={() => sendMessage()}
               disabled={!input.trim() || !!streamingId}
               className={cn(
-                "flex w-10 shrink-0 items-center justify-center self-end rounded py-2",
-                "bg-[var(--color-accent)] text-white transition-colors duration-150",
-                "hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+                "flex shrink-0 items-center gap-1 self-end rounded border px-2 py-1.5 font-mono text-[11px] font-bold",
+                "border-[var(--color-accent)] bg-[var(--color-accent)] text-black",
+                "shadow-[0_0_10px_var(--color-accent-glow)] transition-all",
+                "hover:-translate-y-px hover:shadow-[0_0_18px_var(--color-accent-glow)]",
+                "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
               )}
             >
-              <Send size={15} />
+              <Send size={11} />
+              SEND
             </button>
           </div>
         </div>
@@ -305,7 +337,7 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
 
 export function ChatClient({ pageMap }: { pageMap: Record<string, string> }) {
   return (
-    <MainLayout>
+    <MainLayout fullHeight>
       <Suspense
         fallback={
           <div className="font-mono text-sm text-[var(--color-text-muted)]">Loading...</div>

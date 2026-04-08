@@ -8,73 +8,116 @@ interface DiffLine {
   lineNo?: number;
 }
 
+type RenderLine = DiffLine | { type: "gap"; hidden: number; content?: undefined };
+
 interface DiffViewerProps {
   oldText: string;
   newText: string;
+  /** If true, only show changed lines ±context, collapsing unchanged regions. */
+  compact?: boolean;
 }
 
 /**
  * Simple line-level diff viewer.
  * Uses a greedy LCS approach for small diffs.
  */
-export function DiffViewer({ oldText, newText }: DiffViewerProps) {
-  const lines = computeDiff(oldText, newText);
+export function DiffViewer({ oldText, newText, compact = false }: DiffViewerProps) {
+  const rawLines = computeDiff(oldText, newText);
 
-  if (lines.every((l) => l.type === "unchanged")) {
+  if (rawLines.every((l) => l.type === "unchanged")) {
     return (
       <p className="text-sm text-[var(--color-text-muted)] font-mono py-4 text-center">
-        No differences.
+        変更はありません。
       </p>
     );
   }
+
+  const lines: RenderLine[] = compact ? collapseUnchanged(rawLines, 2) : rawLines;
 
   return (
     <div className="overflow-x-auto rounded border border-[var(--color-border)] text-xs font-mono">
       <table className="w-full border-collapse">
         <tbody>
-          {lines.map((line, i) => (
-            <tr
-              key={i}
-              className={cn(
-                line.type === "added" && "bg-green-50 dark:bg-green-900/20",
-                line.type === "removed" && "bg-red-50 dark:bg-red-900/20",
-                line.type === "unchanged" && "bg-[var(--color-bg-primary)]"
-              )}
-            >
-              <td
+          {lines.map((line, i) => {
+            if (line.type === "gap") {
+              return (
+                <tr key={i} className="bg-[var(--color-bg-secondary)]">
+                  <td
+                    colSpan={2}
+                    className="select-none px-3 py-1 text-center text-[var(--color-text-muted)]"
+                  >
+                    ⋯ {line.hidden} 行省略 ⋯
+                  </td>
+                </tr>
+              );
+            }
+            return (
+              <tr
+                key={i}
                 className={cn(
-                  "select-none w-8 px-2 py-0.5 text-right border-r border-[var(--color-border)] text-[var(--color-text-muted)]",
-                  line.type === "added" && "text-green-600 dark:text-green-400",
-                  line.type === "removed" && "text-red-600 dark:text-red-400"
+                  line.type === "added" && "bg-green-50 dark:bg-green-900/20",
+                  line.type === "removed" && "bg-red-50 dark:bg-red-900/20",
+                  line.type === "unchanged" && "bg-[var(--color-bg-primary)]"
                 )}
               >
-                {line.type === "added" ? "+" : line.type === "removed" ? "−" : " "}
-              </td>
-              <td
-                className={cn(
-                  "px-3 py-0.5 whitespace-pre-wrap break-all",
-                  line.type === "added" && "text-green-700 dark:text-green-300",
-                  line.type === "removed" && "text-red-700 dark:text-red-300 line-through opacity-75",
-                  line.type === "unchanged" && "text-[var(--color-text-secondary)]"
-                )}
-              >
-                {line.content || " "}
-              </td>
-            </tr>
-          ))}
+                <td
+                  className={cn(
+                    "select-none w-8 px-2 py-0.5 text-right border-r border-[var(--color-border)] text-[var(--color-text-muted)]",
+                    line.type === "added" && "text-green-600 dark:text-green-400",
+                    line.type === "removed" && "text-red-600 dark:text-red-400"
+                  )}
+                >
+                  {line.type === "added" ? "+" : line.type === "removed" ? "−" : " "}
+                </td>
+                <td
+                  className={cn(
+                    "px-3 py-0.5 whitespace-pre-wrap break-all",
+                    line.type === "added" && "text-green-700 dark:text-green-300",
+                    line.type === "removed" && "text-red-700 dark:text-red-300 line-through opacity-75",
+                    line.type === "unchanged" && "text-[var(--color-text-secondary)]"
+                  )}
+                >
+                  {line.content || " "}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 }
 
+/** Collapse runs of unchanged lines, keeping `context` lines adjacent to changes. */
+function collapseUnchanged(lines: DiffLine[], context: number): RenderLine[] {
+  const keep = new Array(lines.length).fill(false);
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].type !== "unchanged") {
+      for (let j = Math.max(0, i - context); j <= Math.min(lines.length - 1, i + context); j++) {
+        keep[j] = true;
+      }
+    }
+  }
+  const result: RenderLine[] = [];
+  let hidden = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (keep[i]) {
+      if (hidden > 0) {
+        result.push({ type: "gap", hidden });
+        hidden = 0;
+      }
+      result.push(lines[i]);
+    } else {
+      hidden++;
+    }
+  }
+  if (hidden > 0) result.push({ type: "gap", hidden });
+  return result;
+}
+
 function computeDiff(oldText: string, newText: string): DiffLine[] {
   const oldLines = oldText.split("\n");
   const newLines = newText.split("\n");
-
-  // Build LCS table
-  const m = oldLines.length;
-  const n = newLines.length;
 
   // For large files, limit to first 500 lines each for performance
   const maxLines = 500;
@@ -115,4 +158,16 @@ function computeDiff(oldText: string, newText: string): DiffLine[] {
   }
 
   return result;
+}
+
+/** Count added/removed lines between two texts (for badges, etc.) */
+export function countDiff(oldText: string, newText: string): { added: number; removed: number } {
+  const lines = computeDiff(oldText, newText);
+  let added = 0;
+  let removed = 0;
+  for (const l of lines) {
+    if (l.type === "added") added++;
+    else if (l.type === "removed") removed++;
+  }
+  return { added, removed };
 }

@@ -27,7 +27,6 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
   const fetchRef = useRef<AbortController | null>(null);
   const router = useRouter();
 
-  // Ctrl+K / wiki:focus-search
   useEffect(() => {
     const focusSearch = () => {
       searchRef.current?.focus();
@@ -44,10 +43,8 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
       setOpen(false);
       return;
     }
-
     const ctrl = new AbortController();
     fetchRef.current = ctrl;
-
     fetch(`/api/search?q=${encodeURIComponent(q.trim())}&limit=5`, { signal: ctrl.signal })
       .then((r) => r.json())
       .then((data) => {
@@ -105,35 +102,52 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
     <header
       className={cn(
         "fixed left-0 right-0 top-0 z-30 flex h-10 items-center gap-3 px-3",
-        "border-b border-[var(--color-border)] bg-[var(--color-bg-surface)]",
-        "font-mono"
+        "border-b border-[var(--color-border-strong)] bg-[var(--color-bg-surface)]",
+        "font-mono shadow-[0_2px_20px_var(--color-accent-glow)]"
       )}
     >
-      {/* Sidebar toggle */}
+      {/* Traffic lights */}
+      <div className="hidden items-center gap-1.5 sm:flex">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#FF5C7A] shadow-[0_0_4px_#FF5C7A80]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#FBBF24] shadow-[0_0_4px_#FBBF2480]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-accent)] shadow-[0_0_4px_var(--color-accent-glow)]" />
+      </div>
+
       <button
         onClick={onToggleSidebar}
-        className="cursor-pointer rounded p-1 text-[var(--color-text-secondary)] transition-colors duration-150 hover:bg-[var(--color-bg-sidebar)] hover:text-[var(--color-text-primary)]"
+        className="cursor-pointer rounded p-1 text-[var(--color-text-secondary)] transition-colors duration-150 hover:bg-[var(--color-bg-sidebar)] hover:text-[var(--color-accent)]"
         aria-label="Toggle sidebar"
       >
         <Menu size={14} />
       </button>
 
-      {/* App name */}
+      {/* Terminal prompt */}
       <Link
         href="/"
-        className="whitespace-nowrap text-base font-bold tracking-tight text-[var(--color-text-primary)] transition-colors duration-150 hover:text-[var(--color-accent)]"
+        className="group flex items-center gap-1 whitespace-nowrap font-mono text-[13px] tracking-tight"
       >
-        {appName}
+        <span className="text-[var(--color-text-muted)]">user@</span>
+        <span className="font-bold text-[var(--color-accent)] transition-colors group-hover:text-[var(--color-accent-hover)]">
+          {appName.toLowerCase().replace(/\s+/g, "-")}
+        </span>
+        <span className="text-[var(--color-text-muted)]">:~$</span>
       </Link>
 
-      {/* Search bar */}
+      {/* Search bar — terminal command line */}
       <div className="relative max-w-xl flex-1">
         <form onSubmit={handleSearch}>
-          <div className="relative flex items-center">
-            <Search
-              size={12}
-              className="pointer-events-none absolute left-2.5 text-[var(--color-text-muted)]"
-            />
+          <div
+            className={cn(
+              "relative flex items-center gap-1.5 rounded border px-2.5 py-1",
+              "border-[var(--color-border)] bg-[var(--color-bg-primary)]",
+              "transition-colors focus-within:border-[var(--color-accent)]",
+              "focus-within:shadow-[0_0_10px_var(--color-accent-glow)]"
+            )}
+          >
+            <span className="select-none font-mono text-[13px] font-bold text-[var(--color-accent)]">
+              ❯
+            </span>
+            <Search size={11} className="text-[var(--color-text-muted)]" />
             <input
               ref={searchRef}
               type="text"
@@ -142,27 +156,28 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
               onKeyDown={handleKeyDown}
               onFocus={() => query.trim() && results.length > 0 && setOpen(true)}
               onBlur={() => setTimeout(() => setOpen(false), 150)}
-              placeholder="Search... (Ctrl+K)"
+              placeholder="grep wiki --query ..."
               className={cn(
-                "w-full rounded border py-1 pl-7 pr-7 font-mono text-base",
-                "border-[var(--color-border)] bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]",
-                "placeholder-[var(--color-text-muted)] outline-none transition-colors duration-150",
-                "focus:border-[var(--color-accent)]"
+                "flex-1 bg-transparent font-mono text-[13px]",
+                "text-[var(--color-text-primary)] placeholder:text-[var(--color-text-dim)] outline-none"
               )}
             />
-            {query && (
+            {query ? (
               <button
                 type="button"
                 onClick={clear}
-                className="absolute right-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
               >
                 <X size={12} />
               </button>
+            ) : (
+              <kbd className="hidden select-none items-center gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-1.5 py-0.5 font-mono text-[9px] text-[var(--color-text-muted)] sm:flex">
+                ⌘K
+              </kbd>
             )}
           </div>
         </form>
 
-        {/* Dropdown results */}
         {open && results.length > 0 && (
           <div className="absolute left-0 right-0 top-full z-50 mt-0.5 overflow-hidden rounded border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-md">
             {results.map((r, i) => (
@@ -176,14 +191,14 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
                 className={cn(
                   "block px-3 py-2 transition-colors duration-100",
                   i === activeIdx
-                    ? "bg-[var(--color-accent)] text-white"
+                    ? "bg-[var(--color-accent)] text-black"
                     : "hover:bg-[var(--color-bg-hover)]"
                 )}
               >
                 <p
                   className={cn(
                     "truncate text-sm font-bold",
-                    i === activeIdx ? "text-white" : "text-[var(--color-text-primary)]"
+                    i === activeIdx ? "text-black" : "text-[var(--color-text-primary)]"
                   )}
                 >
                   {r.title}
@@ -192,7 +207,7 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
                   <p
                     className={cn(
                       "mt-0.5 truncate text-xs",
-                      i === activeIdx ? "text-white/80" : "text-[var(--color-text-muted)]"
+                      i === activeIdx ? "text-black/80" : "text-[var(--color-text-muted)]"
                     )}
                   >
                     {r.excerpt}

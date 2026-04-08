@@ -4,6 +4,9 @@ import { cn } from "@/lib/utils";
 import { Header } from "./header";
 import { LeftSidebar } from "./left-sidebar";
 import { RightSidebar } from "./right-sidebar";
+import { CommandPalette } from "./command-palette";
+import { StatusBar } from "./status-bar";
+import { ToastHost } from "@/components/ui/toast-host";
 import { useEffect } from "react";
 import { env } from "@/lib/env";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -51,8 +54,8 @@ export function MainLayout({
 
       <main
         className={cn(
-          "pt-10 transition-all duration-200 sm:transition-[margin]",
-          sidebarOpen ? "sm:ml-52" : "sm:ml-0",
+          "pb-6 pt-10 transition-all duration-200 sm:transition-[margin]",
+          sidebarOpen ? "sm:ml-56" : "sm:ml-0",
           showRightSidebar ? "sm:mr-60" : "sm:mr-0",
           fullHeight && "flex h-screen flex-col"
         )}
@@ -65,6 +68,10 @@ export function MainLayout({
           <div className="p-4 sm:p-6">{children}</div>
         )}
       </main>
+
+      <CommandPalette />
+      <StatusBar />
+      <ToastHost />
     </div>
   );
 }

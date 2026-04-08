@@ -59,7 +59,9 @@ export function RankingClient() {
   const fetchRanking = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/ranking?category=${category}&metric=${metric}&period=${period}`);
+      const res = await fetch(
+        `/api/ranking?category=${category}&metric=${metric}&period=${period}`
+      );
       const data = await res.json();
       setItems(data.items ?? []);
     } finally {
@@ -94,9 +96,7 @@ export function RankingClient() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)]">
-        Ranking
-      </h1>
+      <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)]">Ranking</h1>
 
       {/* Category tabs */}
       <div className="flex gap-1 border-b border-[var(--color-border)]">
@@ -126,7 +126,11 @@ export function RankingClient() {
         </div>
         <div className="ml-auto flex gap-1">
           {PERIODS.map(({ value, label }) => (
-            <button key={value} className={periodBtn(period === value)} onClick={() => setPeriod(value)}>
+            <button
+              key={value}
+              className={periodBtn(period === value)}
+              onClick={() => setPeriod(value)}
+            >
               {label}
             </button>
           ))}
@@ -158,7 +162,7 @@ export function RankingClient() {
                   {item.title}
                 </span>
                 <span className="text-xs text-[var(--color-text-secondary)]">
-                  by {item.author.name}
+                  by {item.author?.name ?? "unknown"}
                 </span>
               </span>
               <span className="flex shrink-0 gap-3 text-xs text-[var(--color-text-secondary)]">
@@ -190,7 +194,7 @@ export function RankingClient() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={item.avatarUrl} alt={item.name} className="h-8 w-8 object-cover" />
                 ) : (
-                  item.name.charAt(0).toUpperCase()
+                  (item.name?.charAt(0) ?? "?").toUpperCase()
                 )}
               </div>
               <span className="min-w-0 flex-1 text-sm text-[var(--color-text-primary)]">

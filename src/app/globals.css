@@ -4,29 +4,86 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Color Tokens (Light Mode) ─── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Terminal OS — Color Tokens
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Light Mode ─── */
 :root {
-  --color-bg-primary: #F9FAFB;
-  --color-bg-surface: #FFFFFF;
-  --color-bg-sidebar: #F3F4F6;
-  --color-border: #E5E7EB;
-  --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
-  --color-accent: #2563EB;
-  --color-accent-hover: #1D4ED8;
+  /* Backgrounds */
+  --color-bg-primary: #FAFBFC;       /* page base */
+  --color-bg-surface: #FFFFFF;       /* cards, panels */
+  --color-bg-secondary: #F3F5F8;     /* subtle panels, diff unchanged */
+  --color-bg-sidebar: #F3F5F8;
+  --color-bg-elevated: #FFFFFF;      /* modals, popovers */
+  --color-bg-hover: #EDF0F4;
+
+  /* Borders */
+  --color-border: #E5E9F0;
+  --color-border-strong: #CBD3DF;
+
+  /* Text */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748B;
+  --color-text-dim: #94A3B8;
+
+  /* Accent — mint (techy default) */
+  --color-accent: #00A676;
+  --color-accent-hover: #008F66;
+  --color-accent-glow: rgba(0, 166, 118, 0.25);
+
+  /* Semantic */
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #E11D48;
+  --color-info: #0284C7;
+
+  /* Ambient grid (light = nearly invisible) */
+  --grid-color: rgba(15, 23, 42, 0.035);
+  --grid-size: 32px;
 }
 
-/* ─── Color Tokens (Dark Mode) ─── */
+/* ─── Dark Mode (Terminal OS) ─── */
 .dark {
-  --color-bg-primary: #030712;
-  --color-bg-surface: #111827;
-  --color-bg-sidebar: #111827;
-  --color-border: #1F2937;
-  --color-text-primary: #F9FAFB;
-  --color-text-secondary: #9CA3AF;
+  /* Backgrounds — deep space */
+  --color-bg-primary: #0A0E14;
+  --color-bg-surface: #0F141C;
+  --color-bg-secondary: #131924;
+  --color-bg-sidebar: #0C1118;
+  --color-bg-elevated: #151B24;
+  --color-bg-hover: #1C2430;
+
+  /* Borders */
+  --color-border: #2A3647;
+  --color-border-strong: #3B4A5F;
+
+  /* Text */
+  --color-text-primary: #E6EDF3;
+  --color-text-secondary: #9BA8B8;
+  --color-text-muted: #64748B;
+  --color-text-dim: #3B4758;
+
+  /* Accent — neon mint */
+  --color-accent: #00E5A0;
+  --color-accent-hover: #00FFB3;
+  --color-accent-glow: rgba(0, 229, 160, 0.35);
+
+  /* Semantic */
+  --color-success: #4ADE80;
+  --color-warning: #FBBF24;
+  --color-danger: #FF5C7A;
+  --color-info: #60A5FA;
+
+  /* Ambient grid */
+  --grid-color: rgba(155, 168, 184, 0.045);
+  --grid-size: 32px;
 }
 
-/* ─── Base Styles ─── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 * {
   box-sizing: border-box;
 }
@@ -42,12 +99,37 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "calt", "liga", "ss01", "ss02";
+
+  /* Ambient grid background — subtle dotted / lined */
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  background-attachment: fixed;
 }
 
-/* ─── Scrollbar ─── */
+/* Radial glow at center of viewport (dark mode only) — adds depth */
+.dark body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(0, 229, 160, 0.05) 0%,
+    transparent 60%
+  );
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -55,41 +137,53 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
+  background: var(--color-border-strong);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
+  background: var(--color-accent);
+  background-clip: padding-box;
+  border: 2px solid transparent;
 }
 
-/* ─── Focus Styles ─── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Focus & Selection
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 1px solid var(--color-accent);
   outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--color-accent-glow);
 }
 
-/* ─── Selection ─── */
 ::selection {
   background-color: var(--color-accent);
-  color: #fff;
+  color: #000;
 }
 
-/* ─── Smooth transitions for theme switch ─── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Theme transition
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 *,
 *::before,
 *::after {
-  transition-property: color, background-color, border-color;
-  transition-duration: 200ms;
-  transition-timing-function: ease;
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Disable transitions during initial load */
 .no-transition * {
   transition: none !important;
 }
 
-/* ─── Utility Classes ─── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Utilities
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -104,5 +198,93 @@ body {
     width: 0;
     min-width: 0;
     overflow: hidden;
+  }
+
+  /* Accent glow — for buttons, active states, hero accents */
+  .glow-accent {
+    box-shadow:
+      0 0 0 1px var(--color-accent),
+      0 0 20px var(--color-accent-glow);
+  }
+
+  .glow-accent-sm {
+    box-shadow: 0 0 12px var(--color-accent-glow);
+  }
+
+  .glow-accent-lg {
+    box-shadow:
+      0 0 0 1px var(--color-accent),
+      0 0 40px var(--color-accent-glow),
+      0 0 80px var(--color-accent-glow);
+  }
+
+  /* Text glow — for hero titles, emphasis */
+  .text-glow {
+    text-shadow: 0 0 16px var(--color-accent-glow);
+  }
+
+  /* Scanline overlay — apply to hero / special panels for CRT vibe */
+  .scanlines {
+    position: relative;
+  }
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 2px,
+      rgba(255, 255, 255, 0.015) 2px,
+      rgba(255, 255, 255, 0.015) 3px
+    );
+    z-index: 1;
+  }
+
+  /* Blinking cursor — terminal style */
+  .cursor-blink::after {
+    content: "█";
+    display: inline-block;
+    margin-left: 2px;
+    color: var(--color-accent);
+    animation: blink 1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Toast slide-in */
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(16px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  /* Glow pulse — for ambient indicators */
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 4px var(--color-accent-glow); }
+    50% { box-shadow: 0 0 14px var(--color-accent-glow); }
+  }
+  .glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  /* Accent color shortcut for bg/text */
+  .bg-accent { background-color: var(--color-accent); }
+  .text-accent { color: var(--color-accent); }
+  .border-accent { border-color: var(--color-accent); }
+
+  /* Keep content above ambient grid */
+  .content-layer {
+    position: relative;
+    z-index: 1;
   }
 }

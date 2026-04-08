@@ -3,25 +3,25 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Paperclip, Loader } from "lucide-react";
+import { toast } from "@/stores/toast-store";
 
 interface FileUploadProps {
   onInsert: (markdown: string) => void;
 }
 
-const ACCEPTED =
-  [
-    "image/jpeg",
-    "image/png",
-    "image/gif",
-    "image/webp",
-    "application/pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "application/vnd.ms-powerpoint",
-  ].join(",");
+const ACCEPTED = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.ms-powerpoint",
+].join(",");
 
 const STATUS_LABELS: Record<string, string> = {
   uploading: "アップロード中...",
@@ -47,13 +47,17 @@ export function FileUpload({ onInsert }: FileUploadProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? "処理に失敗しました");
+        const msg = data.error ?? "処理に失敗しました";
+        setError(msg);
+        toast.error(msg);
         return;
       }
 
       onInsert(`\n\n${data.markdown}\n\n`);
+      toast.success(`${file.name} を挿入しました`);
     } catch {
       setError("処理に失敗しました");
+      toast.error("ファイル処理に失敗しました");
     } finally {
       setStatus(null);
     }
@@ -79,15 +83,11 @@ export function FileUpload({ onInsert }: FileUploadProps) {
         className={cn(
           "flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-xs",
           "text-[var(--color-text-muted)] transition-colors duration-100",
-          "hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]",
-          "disabled:opacity-40 disabled:cursor-not-allowed"
+          "hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)]",
+          "disabled:cursor-not-allowed disabled:opacity-40"
         )}
       >
-        {isLoading ? (
-          <Loader size={12} className="animate-spin" />
-        ) : (
-          <Paperclip size={12} />
-        )}
+        {isLoading ? <Loader size={12} className="animate-spin" /> : <Paperclip size={12} />}
         {isLoading ? STATUS_LABELS[status!] : "添付"}
       </button>
 

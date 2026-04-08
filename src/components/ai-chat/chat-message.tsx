@@ -34,7 +34,7 @@ export function ChatMessageBubble({ message, isStreaming, onOpenPage }: ChatMess
         <p className="whitespace-pre-wrap break-words">
           {message.content}
           {isStreaming && (
-            <span className="ml-0.5 inline-block h-3.5 w-0.5 animate-pulse bg-current align-middle" />
+            <span className="ml-0.5 inline-block h-3.5 w-[7px] animate-[blink_1s_steps(1)_infinite] bg-[var(--color-accent)] align-middle shadow-[0_0_6px_var(--color-accent-glow)]" />
           )}
         </p>
       </div>

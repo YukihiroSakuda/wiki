@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "@/stores/toast-store";
 
 interface LikeButtonProps {
   slug: string;
@@ -20,9 +21,14 @@ export function LikeButton({ slug, initialLiked, initialCount }: LikeButtonProps
     setLoading(true);
     try {
       const res = await fetch(`/api/pages/${slug}/like`, { method: "POST" });
+      if (!res.ok) {
+        toast.error("いいねに失敗しました");
+        return;
+      }
       const data = await res.json();
       setLiked(data.liked);
       setCount(data.count);
+      if (data.liked) toast.success("いいねしました");
     } finally {
       setLoading(false);
     }
