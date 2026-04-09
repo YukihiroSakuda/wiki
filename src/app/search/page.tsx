@@ -43,7 +43,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
   return (
     <MainLayout>
-      <div className="max-w-3xl">
+      <div>
         {/* Header */}
         <header className="mb-4 border-b border-[var(--color-border)] pb-4">
           <h1 className="font-mono text-lg font-bold tracking-tight text-[var(--color-text-primary)]">

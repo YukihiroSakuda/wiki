@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { AutoResizeTextarea } from "@/components/ui/auto-resize-textarea";
 import { useChatStore, type ChatMessage } from "@/stores/chat-store";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Send, Trash2, Sparkles, X, ExternalLink, ChevronLeft } from "lucide-react";
 
 // ─── Page preview panel ───────────────────────────────────────────────────────
@@ -52,7 +53,7 @@ function PagePreviewPanel({
           type="button"
           onClick={onClose}
           className="rounded p-0.5 text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-text-primary)]"
-          title="閉じる"
+          title="close"
         >
           <ChevronLeft size={14} />
         </button>
@@ -64,7 +65,7 @@ function PagePreviewPanel({
           target="_blank"
           rel="noopener noreferrer"
           className="rounded p-0.5 text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-accent)]"
-          title="ページを開く"
+          title="open page"
         >
           <ExternalLink size={13} />
         </a>
@@ -89,9 +90,7 @@ function PagePreviewPanel({
             onWikiLinkClick={(slug) => setCurrentSlug(slug)}
           />
         ) : (
-          <p className="font-mono text-sm text-[var(--color-text-muted)]">
-            ページを読み込めませんでした。
-          </p>
+          <p className="font-mono text-sm text-[var(--color-text-muted)]">failed to load page.</p>
         )}
       </div>
     </div>
@@ -152,7 +151,7 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
       });
 
       if (!res.ok) {
-        updateMessage(assistantId, "エラーが発生しました。もう一度お試しください。");
+        updateMessage(assistantId, "An error occurred. Please try again.");
         return;
       }
 
@@ -229,15 +228,16 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
               msgs: {messages.length}
             </span>
           </div>
-          <button
+          <Button
             type="button"
+            variant="danger"
+            size="sm"
             onClick={clear}
-            className="flex items-center gap-1.5 rounded border border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] px-2.5 py-1 font-mono text-[11px] font-bold text-[var(--color-text-secondary)] transition-colors duration-100 hover:border-[#FF5C7A] hover:bg-[#FF5C7A]/10 hover:text-[#FF5C7A]"
-            title="会話をクリア"
+            title="clear conversation"
           >
             <Trash2 size={10} />
             :clear
-          </button>
+          </Button>
         </div>
 
         {/* Messages */}
@@ -257,8 +257,7 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
                 className="text-[var(--color-accent)] opacity-60 [filter:drop-shadow(0_0_8px_var(--color-accent-glow))]"
               />
               <p className="text-sm text-[var(--color-text-secondary)]">
-                <span className="text-[var(--color-accent)]">❯</span>{" "}
-                wikiについて何でも聞いてください
+                <span className="text-[var(--color-accent)]">❯</span> ask anything about the wiki
               </p>
               <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                 [ claude · azure-search · ready ]
@@ -297,27 +296,23 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="ask wiki --query ... (Enter送信 / Shift+Enter改行)"
+              placeholder="ask wiki --query ... (Enter to send / Shift+Enter for new line)"
               className={cn(
                 "flex-1 bg-transparent px-1 py-1.5 font-mono text-sm text-[var(--color-text-primary)]",
                 "outline-none placeholder:text-[var(--color-text-dim)]"
               )}
             />
-            <button
+            <Button
               type="button"
+              variant="primary"
+              size="sm"
               onClick={() => sendMessage()}
               disabled={!input.trim() || !!streamingId}
-              className={cn(
-                "flex shrink-0 items-center gap-1 self-end rounded border px-2 py-1.5 font-mono text-[11px] font-bold",
-                "border-[var(--color-accent)] bg-[var(--color-accent)] text-black",
-                "shadow-[0_0_10px_var(--color-accent-glow)] transition-all",
-                "hover:-translate-y-px hover:shadow-[0_0_18px_var(--color-accent-glow)]",
-                "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
-              )}
+              className="self-end"
             >
               <Send size={11} />
               SEND
-            </button>
+            </Button>
           </div>
         </div>
       </div>

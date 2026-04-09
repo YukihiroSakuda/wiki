@@ -20,6 +20,8 @@ model User {
   revisions Revision[]
   pageViews PageView[]
   pageLikes PageLike[]
+  questions Question[]
+  answers   Answer[]
 }
 
 model Page {
@@ -113,4 +115,35 @@ model PageLike {
 
   @@id([pageId, userId])
   @@index([pageId])
+}
+
+model Question {
+  id           String   @id @default(cuid())
+  title        String
+  content      String
+  authorId     String
+  status       String   @default("open")
+  bestAnswerId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  author  User     @relation(fields: [authorId], references: [id])
+  answers Answer[]
+
+  @@index([authorId])
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  content    String
+  authorId   String
+  questionId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  author   User     @relation(fields: [authorId], references: [id])
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@index([authorId])
 }

@@ -40,22 +40,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-primary)] font-mono">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg-primary)] font-mono">
       <div className="w-full max-w-sm">
-        <div className="border border-[var(--color-border)] bg-[var(--color-bg-surface)] rounded p-8">
+        <div className="rounded border border-[var(--color-border)] bg-[var(--color-bg-surface)] p-8">
           {/* Logo / Title */}
           <div className="mb-8">
-            <h1 className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">
+            <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)]">
               Internal Wiki
             </h1>
-            <p className="text-sm text-[var(--color-text-secondary)] mt-1">
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
               Sign in to access the knowledge base
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <p className="mb-4 text-sm text-red-500 border border-red-200 rounded px-3 py-2">
+            <p className="border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 mb-4 rounded border px-3 py-2 text-sm text-[var(--color-danger)]">
               {error}
             </p>
           )}
@@ -63,12 +63,12 @@ export default function LoginPage() {
           {/* Azure AD login */}
           <Button
             variant="primary"
-            className="w-full mb-3"
+            className="mb-3 w-full"
             onClick={handleAzureLogin}
             loading={loading}
           >
             {!loading && (
-              <svg viewBox="0 0 23 23" className="w-3.5 h-3.5" fill="currentColor">
+              <svg viewBox="0 0 23 23" className="h-3.5 w-3.5" fill="currentColor">
                 <path d="M0 0h11v11H0zm12 0h11v11H12zM0 12h11v11H0zm12 0h11v11H12z" />
               </svg>
             )}
@@ -78,7 +78,7 @@ export default function LoginPage() {
           {/* Dev login (only in development) */}
           {process.env.NODE_ENV === "development" && (
             <>
-              <div className="flex items-center gap-2 my-4">
+              <div className="my-4 flex items-center gap-2">
                 <div className="flex-1 border-t border-[var(--color-border)]" />
                 <span className="text-sm text-[var(--color-text-secondary)]">dev only</span>
                 <div className="flex-1 border-t border-[var(--color-border)]" />
@@ -95,7 +95,7 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-sm text-[var(--color-text-secondary)] mt-4">
+        <p className="mt-4 text-center text-sm text-[var(--color-text-secondary)]">
           Powered by Azure AI Foundry
         </p>
       </div>

@@ -95,7 +95,7 @@ export function RankingClient() {
     }`;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)]">Ranking</h1>
 
       {/* Category tabs */}

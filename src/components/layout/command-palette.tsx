@@ -32,7 +32,8 @@ type ActionItem = {
   id: string;
   label: string;
   hint?: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: React.ComponentType<any>;
   onRun: () => void;
 };
 
@@ -128,55 +129,55 @@ export function CommandPalette() {
       {
         kind: "action",
         id: "new",
-        label: "新しいページを作成",
-        hint: "New Page",
+        label: "New Page",
+        hint: "Create",
         icon: Plus,
         onRun: () => router.push("/editor"),
       },
       {
         kind: "action",
         id: "home",
-        label: "ホームへ移動",
-        hint: "Dashboard",
+        label: "Dashboard",
+        hint: "Home",
         icon: Home,
         onRun: () => router.push("/"),
       },
       {
         kind: "action",
         id: "pages",
-        label: "すべてのページ",
-        hint: "All Pages",
+        label: "All Pages",
+        hint: "Pages",
         icon: FileText,
         onRun: () => router.push("/pages"),
       },
       {
         kind: "action",
         id: "chat",
-        label: "AI チャットを開く",
-        hint: "AI Chat",
+        label: "AI Chat",
+        hint: "Chat",
         icon: MessageSquare,
         onRun: () => router.push("/chat"),
       },
       {
         kind: "action",
         id: "ranking",
-        label: "ランキング",
-        hint: "Ranking",
+        label: "Ranking",
+        hint: "Top pages",
         icon: Trophy,
         onRun: () => router.push("/ranking"),
       },
       {
         kind: "action",
         id: "settings",
-        label: "設定",
-        hint: "Settings",
+        label: "Settings",
+        hint: "Preferences",
         icon: Settings,
         onRun: () => router.push("/settings"),
       },
       {
         kind: "action",
         id: "theme",
-        label: theme === "dark" ? "ライトモードに切替" : "ダークモードに切替",
+        label: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
         hint: "Toggle theme",
         icon: theme === "dark" ? Sun : Moon,
         onRun: () => toggleTheme(),
@@ -245,9 +246,7 @@ export function CommandPalette() {
   // Scroll active item into view
   useEffect(() => {
     if (!open) return;
-    const el = listRef.current?.querySelector<HTMLElement>(
-      `[data-idx="${activeIdx}"]`
-    );
+    const el = listRef.current?.querySelector<HTMLElement>(`[data-idx="${activeIdx}"]`);
     el?.scrollIntoView({ block: "nearest" });
   }, [activeIdx, open]);
 
@@ -283,7 +282,7 @@ export function CommandPalette() {
               setActiveIdx(0);
             }}
             onKeyDown={onKeyDown}
-            placeholder="コマンド・ページを検索... (type to filter)"
+            placeholder="search commands & pages... (type to filter)"
             className={cn(
               "flex-1 bg-transparent font-mono text-sm outline-none",
               "text-[var(--color-text-primary)] placeholder:text-[var(--color-text-dim)]"
@@ -303,13 +302,10 @@ export function CommandPalette() {
         </div>
 
         {/* Results list */}
-        <div
-          ref={listRef}
-          className="max-h-[50vh] overflow-y-auto"
-        >
+        <div ref={listRef} className="max-h-[50vh] overflow-y-auto">
           {items.length === 0 && (
             <div className="px-4 py-10 text-center font-mono text-xs text-[var(--color-text-muted)]">
-              結果なし — try another keyword
+              no results — try another keyword
             </div>
           )}
 
@@ -371,9 +367,7 @@ export function CommandPalette() {
                     onClick={() => runItem(p)}
                     className={cn(
                       "flex w-full items-start gap-3 px-4 py-2 text-left font-mono text-sm transition-colors",
-                      active
-                        ? "bg-[var(--color-bg-hover)]"
-                        : "hover:bg-[var(--color-bg-hover)]"
+                      active ? "bg-[var(--color-bg-hover)]" : "hover:bg-[var(--color-bg-hover)]"
                     )}
                   >
                     <FileText
@@ -387,9 +381,7 @@ export function CommandPalette() {
                       <div
                         className={cn(
                           "truncate font-bold",
-                          active
-                            ? "text-[var(--color-accent)]"
-                            : "text-[var(--color-text-primary)]"
+                          active ? "text-[var(--color-accent)]" : "text-[var(--color-text-primary)]"
                         )}
                       >
                         {p.title}

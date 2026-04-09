@@ -140,7 +140,7 @@ function InlineCharDiff({ ops }: { ops: CharOp[] }) {
           return (
             <span
               key={i}
-              className="rounded bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+              className="bg-[var(--color-danger)]/20 rounded text-[var(--color-danger)]"
             >
               {op.text}
             </span>
@@ -148,7 +148,7 @@ function InlineCharDiff({ ops }: { ops: CharOp[] }) {
         return (
           <span
             key={i}
-            className="rounded bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+            className="bg-[var(--color-success)]/20 rounded text-[var(--color-success)]"
           >
             {op.text}
           </span>
@@ -158,9 +158,7 @@ function InlineCharDiff({ ops }: { ops: CharOp[] }) {
   );
 }
 
-type Row =
-  | { kind: "pair"; pair: LinePair }
-  | { kind: "gap"; hidden: number };
+type Row = { kind: "pair"; pair: LinePair } | { kind: "gap"; hidden: number };
 
 /** Collapse runs of unchanged lines, keeping `context` lines around changes. */
 function collapsePairs(pairs: LinePair[], context: number): Row[] {
@@ -202,10 +200,10 @@ interface SideBySideDiffProps {
 
 export function SideBySideDiff({
   pairs,
-  leftLabel = "変更前",
-  rightLabel = "変更後",
+  leftLabel = "before",
+  rightLabel = "after",
   compact = false,
-  emptyMessage = "変更箇所なし",
+  emptyMessage = "no changes",
 }: SideBySideDiffProps) {
   const allUnchanged = pairs.every((p) => p.kind === "unchanged");
   if (allUnchanged) {
@@ -239,7 +237,7 @@ export function SideBySideDiff({
               key={idx}
               className="border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-3 py-1 text-center text-[var(--color-text-muted)]"
             >
-              ⋯ {row.hidden} 行省略 ⋯
+              ⋯ {row.hidden} lines hidden ⋯
             </div>
           );
         }
@@ -264,7 +262,7 @@ export function SideBySideDiff({
         if (pair.kind === "removed") {
           return (
             <div key={idx} className="grid grid-cols-2 divide-x divide-[var(--color-border)]">
-              <div className="whitespace-pre-wrap break-all bg-red-50 px-3 py-0.5 text-red-700 dark:bg-red-900/20 dark:text-red-300">
+              <div className="bg-[var(--color-danger)]/10 whitespace-pre-wrap break-all px-3 py-0.5 text-[var(--color-danger)]">
                 {pair.text || "\u00a0"}
               </div>
               <div className="bg-[var(--color-bg-primary)] px-3 py-0.5">{"\u00a0"}</div>
@@ -276,7 +274,7 @@ export function SideBySideDiff({
           return (
             <div key={idx} className="grid grid-cols-2 divide-x divide-[var(--color-border)]">
               <div className="bg-[var(--color-bg-primary)] px-3 py-0.5">{"\u00a0"}</div>
-              <div className="whitespace-pre-wrap break-all bg-green-50 px-3 py-0.5 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+              <div className="bg-[var(--color-success)]/10 whitespace-pre-wrap break-all px-3 py-0.5 text-[var(--color-success)]">
                 {pair.text || "\u00a0"}
               </div>
             </div>
@@ -286,10 +284,10 @@ export function SideBySideDiff({
         // changed — left shows del+eq, right shows ins+eq with inline highlights
         return (
           <div key={idx} className="grid grid-cols-2 divide-x divide-[var(--color-border)]">
-            <div className="whitespace-pre-wrap break-all bg-red-50 px-3 py-0.5 text-red-700 dark:bg-red-900/20 dark:text-red-300">
+            <div className="bg-[var(--color-danger)]/10 whitespace-pre-wrap break-all px-3 py-0.5 text-[var(--color-danger)]">
               <InlineCharDiff ops={pair.charDiff.filter((op) => op.type !== "ins")} />
             </div>
-            <div className="whitespace-pre-wrap break-all bg-green-50 px-3 py-0.5 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+            <div className="bg-[var(--color-success)]/10 whitespace-pre-wrap break-all px-3 py-0.5 text-[var(--color-success)]">
               <InlineCharDiff ops={pair.charDiff.filter((op) => op.type !== "del")} />
             </div>
           </div>

@@ -22,13 +22,13 @@ export function LikeButton({ slug, initialLiked, initialCount }: LikeButtonProps
     try {
       const res = await fetch(`/api/pages/${slug}/like`, { method: "POST" });
       if (!res.ok) {
-        toast.error("いいねに失敗しました");
+        toast.error("failed to like");
         return;
       }
       const data = await res.json();
       setLiked(data.liked);
       setCount(data.count);
-      if (data.liked) toast.success("いいねしました");
+      if (data.liked) toast.success("liked");
     } finally {
       setLoading(false);
     }

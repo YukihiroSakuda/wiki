@@ -13,6 +13,7 @@ import {
   Trophy,
   Hash,
   Search,
+  HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,8 +24,9 @@ interface LeftSidebarProps {
 }
 
 const NAV_ITEMS = [
-  { href: "/", label: "index.tsx", icon: Home },
+  { href: "/", label: "README.md", icon: Home },
   { href: "/pages", label: "pages/", icon: FileText },
+  { href: "/questions", label: "questions/", icon: HelpCircle },
   { href: "/ranking", label: "ranking.md", icon: Trophy },
   { href: "/chat", label: "ai-chat.sh", icon: MessageSquare },
   { href: "/settings", label: "config.json", icon: Settings },
@@ -92,17 +94,9 @@ export function LeftSidebar({ isOpen }: LeftSidebarProps) {
           icon={navOpen ? FolderOpen : Folder}
         >
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active =
-              pathname === href || (href !== "/" && pathname.startsWith(href));
+            const active = pathname === href || (href !== "/" && pathname.startsWith(href));
             return (
-              <TreeRow
-                key={href}
-                href={href}
-                label={label}
-                icon={Icon}
-                active={active}
-                depth={1}
-              />
+              <TreeRow key={href} href={href} label={label} icon={Icon} active={active} depth={1} />
             );
           })}
         </Section>
@@ -116,9 +110,7 @@ export function LeftSidebar({ isOpen }: LeftSidebarProps) {
           count={recent.length}
         >
           {recent.length === 0 && (
-            <div className="px-6 py-1 text-[10px] text-[var(--color-text-dim)]">
-              empty
-            </div>
+            <div className="px-6 py-1 text-[10px] text-[var(--color-text-dim)]">empty</div>
           )}
           {recent.map((p) => {
             const href = `/wiki/${p.slug}`;
@@ -169,21 +161,19 @@ function Section({
   label: string;
   open: boolean;
   onToggle?: () => void;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: React.ComponentType<any>;
   count?: number;
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-[var(--color-border)]/50">
+    <div className="border-[var(--color-border)]/50 border-b">
       <button
         type="button"
         onClick={onToggle}
         className="flex w-full items-center gap-1 px-2 py-1 text-left text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
       >
-        <ChevronRight
-          size={10}
-          className={cn("transition-transform", open && "rotate-90")}
-        />
+        <ChevronRight size={10} className={cn("transition-transform", open && "rotate-90")} />
         <Icon size={11} className="text-[var(--color-accent)]" />
         <span className="font-bold">{label}</span>
         {typeof count === "number" && (
@@ -204,7 +194,8 @@ function TreeRow({
 }: {
   href: string;
   label: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: React.ComponentType<any>;
   active: boolean;
   depth: number;
 }) {

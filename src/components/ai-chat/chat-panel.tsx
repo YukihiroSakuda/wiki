@@ -50,7 +50,7 @@ function PanelPagePreview({
           type="button"
           onClick={onBack}
           className="rounded p-1 text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-text-primary)]"
-          title="チャットに戻る"
+          title="back to chat"
         >
           <ChevronLeft size={14} />
         </button>
@@ -62,7 +62,7 @@ function PanelPagePreview({
           target="_blank"
           rel="noopener noreferrer"
           className="rounded p-1 text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-accent)]"
-          title="ページを開く"
+          title="open page"
         >
           <ExternalLink size={13} />
         </a>
@@ -80,9 +80,7 @@ function PanelPagePreview({
             onWikiLinkClick={(slug) => setCurrentSlug(slug)}
           />
         ) : (
-          <p className="font-mono text-sm text-[var(--color-text-muted)]">
-            ページを読み込めませんでした。
-          </p>
+          <p className="font-mono text-sm text-[var(--color-text-muted)]">failed to load page.</p>
         )}
       </div>
     </>
@@ -262,11 +260,11 @@ export function ChatPanel() {
                 <button
                   type="button"
                   onClick={clear}
-                  title="会話をクリア"
-                  className="flex items-center gap-1 rounded px-1.5 py-1 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:text-red-500"
+                  title="clear conversation"
+                  className="flex items-center gap-1 rounded px-1.5 py-1 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-danger)]"
                 >
                   <Trash2 size={12} />
-                  クリア
+                  clear
                 </button>
                 <button
                   type="button"
@@ -336,7 +334,7 @@ export function ChatPanel() {
                 </button>
               </div>
               <p className="mt-1 font-mono text-xs text-[var(--color-text-muted)]">
-                Shift+Enter で改行
+                Shift+Enter for new line
               </p>
             </div>
           </>

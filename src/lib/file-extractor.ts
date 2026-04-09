@@ -248,9 +248,9 @@ export async function extractFileToMarkdown(
       return await visionOfficeDocument(extractedText, embeddedImages, filename, fileType);
     }
 
-    return `> **${fileType}: ${filename}**\n>\n> コンテンツを抽出できませんでした。`;
+    return `> **${fileType}: ${filename}**\n>\n> Failed to extract content.`;
   } catch (err) {
     console.error(`[file-extractor] Error processing ${filename}:`, err);
-    throw new Error(`${filename} の処理に失敗しました。`);
+    throw new Error(`Failed to process ${filename}.`);
   }
 }

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file");
 
     if (!(file instanceof File)) {
-      return NextResponse.json({ error: "ファイルが指定されていません" }, { status: 400 });
+      return NextResponse.json({ error: "No file specified" }, { status: 400 });
     }
 
     if (!isSupportedType(file.type)) {
@@ -28,13 +28,13 @@ export async function POST(req: NextRequest) {
         .filter((v, i, a) => a.indexOf(v) === i)
         .join(", ");
       return NextResponse.json(
-        { error: `対応していないファイル形式です。対応: ${supported}` },
+        { error: `Unsupported file type. Supported: ${supported}` },
         { status: 400 }
       );
     }
 
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: "ファイルサイズが上限(30MB)を超えています" }, { status: 400 });
+      return NextResponse.json({ error: "File size exceeds the 30MB limit" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ markdown });
   } catch (error) {
     console.error("POST /api/extract-file error:", error);
-    const message = error instanceof Error ? error.message : "処理に失敗しました";
+    const message = error instanceof Error ? error.message : "Processing failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

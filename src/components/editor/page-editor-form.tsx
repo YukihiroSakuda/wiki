@@ -60,7 +60,7 @@ export function PageEditorForm({
 
   const handleSaveClick = () => {
     if (!title.trim()) {
-      setError("タイトルを入力してください。");
+      setError("Please enter a title.");
       return;
     }
     setError(null);
@@ -76,7 +76,7 @@ export function PageEditorForm({
   const handleSave = async () => {
     setConfirmSaveOpen(false);
     if (!title.trim()) {
-      setError("タイトルを入力してください。");
+      setError("Please enter a title.");
       return;
     }
     setSaving(true);
@@ -91,10 +91,10 @@ export function PageEditorForm({
         });
         if (!res.ok) {
           const d = await res.json();
-          throw new Error(d.error ?? "作成に失敗しました。");
+          throw new Error(d.error ?? "Failed to create page.");
         }
         const page = await res.json();
-        toast.success(`ページを作成しました: ${page.title}`);
+        toast.success(`Page created: ${page.title}`);
         router.push(`/wiki/${page.slug}`);
       } else {
         const res = await fetch(`/api/pages/${slug}`, {
@@ -104,15 +104,15 @@ export function PageEditorForm({
         });
         if (!res.ok) {
           const d = await res.json();
-          throw new Error(d.error ?? "保存に失敗しました。");
+          throw new Error(d.error ?? "Failed to save.");
         }
         const page = await res.json();
-        toast.success("変更を保存しました");
+        toast.success("Changes saved");
         router.push(`/wiki/${page.slug}`);
         router.refresh();
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "予期しないエラーが発生しました。";
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -129,12 +129,12 @@ export function PageEditorForm({
     setError(null);
     try {
       const res = await fetch(`/api/pages/${slug}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("削除に失敗しました。");
-      toast.warn("ページを削除しました");
+      if (!res.ok) throw new Error("Failed to delete page.");
+      toast.warn("Page deleted");
       router.push("/");
       router.refresh();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "予期しないエラーが発生しました。";
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
       setError(msg);
       toast.error(msg);
       setDeleting(false);
@@ -161,7 +161,7 @@ export function PageEditorForm({
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="ページタイトル"
+          placeholder="Page title"
           className="h-9 flex-1 font-mono text-base font-bold"
           onKeyDown={(e) => {
             if (e.key === "Enter") e.preventDefault();
@@ -173,10 +173,10 @@ export function PageEditorForm({
             onClick={() => setProofreadOpen(true)}
             disabled={saving || deleting}
             className="flex items-center gap-1 rounded px-2 py-1 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-accent)] disabled:opacity-50"
-            title="AIによる文章・マークダウン校正"
+            title="AI proofread for text and markdown"
           >
             <ScanText size={12} />
-            校正
+            proofread
           </button>
           <Button
             variant="primary"
@@ -186,7 +186,7 @@ export function PageEditorForm({
             disabled={saving || deleting}
           >
             <Save size={13} />
-            {isNew ? "作成" : "保存"}
+            {isNew ? "create" : "save"}
           </Button>
           <Button
             variant="secondary"
@@ -194,7 +194,7 @@ export function PageEditorForm({
             onClick={() => router.back()}
             disabled={saving || deleting}
           >
-            キャンセル
+            cancel
           </Button>
           {!isNew && (
             <Button
@@ -206,7 +206,7 @@ export function PageEditorForm({
               className={cn(confirmDelete && "animate-pulse")}
             >
               <Trash2 size={13} />
-              {confirmDelete ? "確認削除" : "削除"}
+              {confirmDelete ? "confirm delete" : "delete"}
             </Button>
           )}
         </div>
@@ -230,14 +230,14 @@ export function PageEditorForm({
             className="flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-accent)] disabled:opacity-50"
           >
             <Sparkles size={10} />
-            {suggestingTags ? "提案中..." : "AI提案"}
+            {suggestingTags ? "suggesting..." : "AI suggest"}
           </button>
         )}
       </div>
 
       {/* ── Error ── */}
       {error && (
-        <div className="flex items-center gap-2 rounded border border-red-300 bg-red-50 px-3 py-2 font-mono text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <div className="border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 flex items-center gap-2 rounded border px-3 py-2 font-mono text-sm text-[var(--color-danger)]">
           <AlertCircle size={13} />
           {error}
         </div>
@@ -248,7 +248,7 @@ export function PageEditorForm({
         <MarkdownEditor
           value={content}
           onChange={handleContentChange}
-          placeholder="Markdownでページの内容を書く...&#10;&#10;テンプレートボタンをクリックすると構文が挿入されます。"
+          placeholder="Write page content in Markdown...&#10;&#10;Click a template button to insert syntax."
           textareaRef={textareaRef}
           autocompleteSlot={
             <WikiLinkAutocomplete
@@ -349,12 +349,12 @@ function SaveConfirmModal({
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
           <div className="flex items-center gap-2 font-mono text-sm font-bold text-[var(--color-text-primary)]">
             <Save size={14} className="text-[var(--color-accent)]" />
-            保存内容の確認
+            confirm save
             {contentChanged && (
               <span className="ml-2 font-mono text-xs font-normal">
-                <span className="text-green-600 dark:text-green-400">+{added}</span>
+                <span className="text-[var(--color-success)]">+{added}</span>
                 <span className="mx-1 text-[var(--color-text-muted)]">/</span>
-                <span className="text-red-600 dark:text-red-400">−{removed}</span>
+                <span className="text-[var(--color-danger)]">−{removed}</span>
               </span>
             )}
           </div>
@@ -367,50 +367,44 @@ function SaveConfirmModal({
             {titleChanged ? (
               <div className="flex flex-col gap-2">
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                  タイトルの変更
+                  title changes
                 </span>
                 <div className="rounded border border-[var(--color-border)] font-mono text-sm">
-                  <div className="flex items-start gap-2 border-b border-[var(--color-border)] bg-red-50 px-3 py-2 dark:bg-red-900/20">
-                    <span className="mt-0.5 shrink-0 text-xs text-red-600 dark:text-red-400">
-                      −
-                    </span>
-                    <span className="text-red-700 opacity-75 dark:text-red-300">
-                      {baselineTitle || "(空)"}
+                  <div className="bg-[var(--color-danger)]/10 flex items-start gap-2 border-b border-[var(--color-border)] px-3 py-2">
+                    <span className="mt-0.5 shrink-0 text-xs text-[var(--color-danger)]">−</span>
+                    <span className="text-[var(--color-danger)] opacity-75">
+                      {baselineTitle || "(empty)"}
                     </span>
                   </div>
-                  <div className="flex items-start gap-2 bg-green-50 px-3 py-2 dark:bg-green-900/20">
-                    <span className="mt-0.5 shrink-0 text-xs text-green-600 dark:text-green-400">
-                      +
-                    </span>
-                    <span className="text-green-700 dark:text-green-300">
-                      {currentTitle || "(空)"}
-                    </span>
+                  <div className="bg-[var(--color-success)]/10 flex items-start gap-2 px-3 py-2">
+                    <span className="mt-0.5 shrink-0 text-xs text-[var(--color-success)]">+</span>
+                    <span className="text-[var(--color-success)]">{currentTitle || "(empty)"}</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)]">
-                タイトルは変更なし
+                title unchanged
               </div>
             )}
 
             {/* Content diff */}
             <div className="flex flex-col gap-2">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                本文の変更差分
+                content diff
               </span>
               {contentChanged ? (
-                <SideBySideDiff pairs={pairs} leftLabel="保存済み" rightLabel="編集中" />
+                <SideBySideDiff pairs={pairs} leftLabel="saved" rightLabel="editing" />
               ) : (
                 <div className="flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)]">
-                  本文は変更なし
+                  content unchanged
                 </div>
               )}
             </div>
 
             {!titleChanged && !contentChanged && (
               <p className="py-4 text-center font-mono text-sm text-[var(--color-text-muted)]">
-                変更はありません。このまま保存しますか?
+                no changes. save anyway?
               </p>
             )}
           </div>
@@ -419,7 +413,7 @@ function SaveConfirmModal({
         {/* Footer */}
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[var(--color-border)] px-5 py-3">
           <Button variant="ghost" size="md" onClick={onCancel} disabled={saving}>
-            キャンセル
+            cancel
           </Button>
           <Button
             variant="primary"
@@ -429,7 +423,7 @@ function SaveConfirmModal({
             disabled={saving}
           >
             <Save size={13} />
-            保存する
+            save
           </Button>
         </div>
       </div>

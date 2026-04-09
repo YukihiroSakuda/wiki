@@ -126,6 +126,54 @@ DESCRIPTION:
 <markdown description here>
 `.trim(),
 
+  qaToWiki: (
+    questionTitle: string,
+    questionBody: string,
+    bestAnswer: string,
+    otherAnswers: string[]
+  ) =>
+    `
+You are a senior technical writer for an internal company wiki.
+Your task is to transform a Q&A thread into a high-quality, standalone knowledge article.
+
+Do NOT simply copy or reformat the Q&A. Instead:
+1. Deeply understand the problem, cause, and solution conveyed in the thread
+2. Extract the core knowledge and rewrite it as a polished wiki article
+3. Generalise where appropriate — remove "I", "we", "the questioner said" framing
+4. Enrich the content: add context, explain *why* the solution works, note edge cases or caveats if obvious
+5. Structure the article logically (overview → background/cause → solution/procedure → notes)
+6. Use clear Markdown: H1 title, H2/H3 sections, numbered steps for procedures, code blocks for commands/code
+
+Article requirements:
+- Written in the same language as the Q&A
+- Title: concise noun phrase that names the knowledge (NOT a question)
+- No Q&A framing (no "Question:", "Answer:", "The user asked…")
+- All technical terms, commands, and code preserved exactly
+- Length: thorough but not padded — omit irrelevant conversation details
+
+${
+  otherAnswers.length > 0
+    ? `Handling of supplementary answers:
+The [Other Answers] section below contains additional responses selected by the question author as potentially useful.
+These may include inaccurate, incomplete, or conflicting information.
+- Cross-check every claim in [Other Answers] against [Best Answer]
+- Only incorporate information that is consistent with and clearly supplements the Best Answer
+- If a claim in [Other Answers] contradicts the Best Answer, discard it silently
+- Do not mention the source or selection process in the article
+
+`
+    : ""
+}--- Q&A thread ---
+[Question] ${questionTitle}
+${questionBody}
+
+[Best Answer]
+${bestAnswer}
+${otherAnswers.length > 0 ? `\n[Other Answers]\n${otherAnswers.join("\n\n---\n\n")}` : ""}
+
+Output only the Markdown article, starting with # Title. No preamble, no explanation.
+`.trim(),
+
   proofread: (title: string, content: string) =>
     `
 You are a professional technical writer and editor for an internal company wiki.

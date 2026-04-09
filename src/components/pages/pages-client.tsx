@@ -198,7 +198,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
             All Pages
           </h1>
           <span className="font-mono text-xs text-[var(--color-text-muted)]">
-            {loading ? <Spinner size="sm" /> : `${total} ページ`}
+            {loading ? <Spinner size="sm" /> : `${total}`}
           </span>
         </div>
 
@@ -215,7 +215,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="タイトル・本文を検索…"
+            placeholder="search title & content..."
             className="flex-1 bg-transparent font-mono text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
           />
           {query && (
@@ -234,7 +234,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
           <button
             type="button"
             onClick={() => setMode("fulltext")}
-            title="全文検索"
+            title="Full-text search"
             className={cn(
               "flex items-center gap-1 rounded-l px-2.5 py-1.5 transition-colors duration-100",
               mode === "fulltext"
@@ -243,12 +243,12 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
             )}
           >
             <Search size={11} />
-            全文
+            full-text
           </button>
           <button
             type="button"
             onClick={() => setMode("semantic")}
-            title="ベクトル検索（意味検索）"
+            title="Semantic search (vector)"
             className={cn(
               "flex items-center gap-1 rounded-r px-2.5 py-1.5 transition-colors duration-100",
               mode === "semantic"
@@ -257,7 +257,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
             )}
           >
             <Zap size={11} />
-            意味
+            semantic
           </button>
         </div>
 
@@ -271,7 +271,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
           )}
         >
           <Plus size={12} />
-          新規作成
+          new page
         </Link>
       </div>
 
@@ -305,12 +305,12 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
               className="inline-flex items-center gap-1 rounded border border-[var(--color-border)] px-2 py-0.5 font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
             >
               <X size={10} />
-              クリア
+              clear
             </button>
           )}
           {isSearching && mode === "semantic" && (
             <span className="ml-auto font-mono text-xs text-[var(--color-accent)]">
-              · 意味検索モード
+              · semantic search mode
             </span>
           )}
         </div>
@@ -322,7 +322,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
           <thead>
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg-sidebar)]">
               <ColHeader
-                label="タイトル"
+                label="title"
                 sortKey="title"
                 current={sort}
                 onClick={!isSearching ? setSort : undefined}
@@ -331,22 +331,22 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
                 Tags
               </th>
               <th className="w-28 px-4 py-2 text-left font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                作成者
+                author
               </th>
               <ColHeader
-                label="更新日"
+                label="updated"
                 sortKey="updated"
                 current={sort}
                 onClick={!isSearching ? setSort : undefined}
               />
               <ColHeader
-                label="閲覧"
+                label="views"
                 sortKey="views"
                 current={sort}
                 onClick={!isSearching ? setSort : undefined}
               />
               <th className="w-16 px-4 py-2 text-left font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                いいね
+                likes
               </th>
             </tr>
           </thead>
@@ -358,7 +358,7 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
                   colSpan={6}
                   className="px-4 py-8 text-center font-mono text-sm text-[var(--color-text-secondary)]"
                 >
-                  該当するページが見つかりませんでした。
+                  no matching pages found
                 </td>
               </tr>
             )}
@@ -368,9 +368,9 @@ export function PagesClient({ initialPages, initialTotal, allTags }: PagesClient
                   colSpan={6}
                   className="px-4 py-8 text-center font-mono text-sm text-[var(--color-text-secondary)]"
                 >
-                  ページがありません。{" "}
+                  no pages yet.{" "}
                   <Link href="/editor" className="text-[var(--color-accent)] hover:underline">
-                    作成する
+                    create one
                   </Link>
                 </td>
               </tr>

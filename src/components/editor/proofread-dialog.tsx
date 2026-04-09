@@ -130,7 +130,7 @@ function InlineCharDiff({ ops }: { ops: CharOp[] }) {
           return (
             <span
               key={i}
-              className="rounded bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+              className="bg-[var(--color-danger)]/20 rounded text-[var(--color-danger)]"
             >
               {op.text}
             </span>
@@ -138,7 +138,7 @@ function InlineCharDiff({ ops }: { ops: CharOp[] }) {
         return (
           <span
             key={i}
-            className="rounded bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+            className="bg-[var(--color-success)]/20 rounded text-[var(--color-success)]"
           >
             {op.text}
           </span>
@@ -153,7 +153,7 @@ function DiffLines({ pairs }: { pairs: LinePair[] }) {
   if (allUnchanged) {
     return (
       <p className="py-6 text-center font-mono text-sm text-[var(--color-text-muted)]">
-        変更箇所なし
+        no changes
       </p>
     );
   }
@@ -163,10 +163,10 @@ function DiffLines({ pairs }: { pairs: LinePair[] }) {
       {/* Column headers */}
       <div className="grid grid-cols-2 divide-x divide-[var(--color-border)] border-b border-[var(--color-border)] bg-[var(--color-bg-sidebar)]">
         <div className="px-3 py-1.5 font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-          校正前
+          before
         </div>
         <div className="px-3 py-1.5 font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-          校正後
+          after
         </div>
       </div>
 
@@ -190,7 +190,7 @@ function DiffLines({ pairs }: { pairs: LinePair[] }) {
         if (pair.kind === "removed") {
           return (
             <div key={idx} className="grid grid-cols-2 divide-x divide-[var(--color-border)]">
-              <div className="whitespace-pre-wrap break-all bg-red-50 px-3 py-0.5 text-red-700 dark:bg-red-900/20 dark:text-red-300">
+              <div className="bg-[var(--color-danger)]/10 whitespace-pre-wrap break-all px-3 py-0.5 text-[var(--color-danger)]">
                 {pair.text || "\u00a0"}
               </div>
               <div className="bg-[var(--color-bg-primary)] px-3 py-0.5">{"\u00a0"}</div>
@@ -202,7 +202,7 @@ function DiffLines({ pairs }: { pairs: LinePair[] }) {
           return (
             <div key={idx} className="grid grid-cols-2 divide-x divide-[var(--color-border)]">
               <div className="bg-[var(--color-bg-primary)] px-3 py-0.5">{"\u00a0"}</div>
-              <div className="whitespace-pre-wrap break-all bg-green-50 px-3 py-0.5 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+              <div className="bg-[var(--color-success)]/10 whitespace-pre-wrap break-all px-3 py-0.5 text-[var(--color-success)]">
                 {pair.text || "\u00a0"}
               </div>
             </div>
@@ -212,10 +212,10 @@ function DiffLines({ pairs }: { pairs: LinePair[] }) {
         // changed — left: del chars highlighted, right: ins chars highlighted
         return (
           <div key={idx} className="grid grid-cols-2 divide-x divide-[var(--color-border)]">
-            <div className="whitespace-pre-wrap break-all bg-red-50 px-3 py-0.5 text-red-700 dark:bg-red-900/20 dark:text-red-300">
+            <div className="bg-[var(--color-danger)]/10 whitespace-pre-wrap break-all px-3 py-0.5 text-[var(--color-danger)]">
               <InlineCharDiff ops={pair.charDiff.filter((op) => op.type !== "ins")} />
             </div>
-            <div className="whitespace-pre-wrap break-all bg-green-50 px-3 py-0.5 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+            <div className="bg-[var(--color-success)]/10 whitespace-pre-wrap break-all px-3 py-0.5 text-[var(--color-success)]">
               <InlineCharDiff ops={pair.charDiff.filter((op) => op.type !== "del")} />
             </div>
           </div>
@@ -291,10 +291,10 @@ export function ProofreadDialog({
       })
       .catch((err: unknown) => {
         if (err instanceof Error && err.name === "AbortError") return;
-        const msg = err instanceof Error ? err.message : "エラーが発生しました。";
+        const msg = err instanceof Error ? err.message : "An error occurred.";
         setError(msg);
         setPhase("error");
-        toast.error(`AI校正に失敗: ${msg}`);
+        toast.error(`AI proofread failed: ${msg}`);
       });
 
     return () => ctrl.abort();
@@ -319,7 +319,7 @@ export function ProofreadDialog({
   function handleApply() {
     const titleToApply = applyTitle ? newTitle : currentTitle;
     onApply(titleToApply, newContent);
-    toast.success("AI校正を適用しました");
+    toast.success("AI proofread applied");
     onClose();
   }
 
@@ -347,7 +347,7 @@ export function ProofreadDialog({
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
           <div className="flex items-center gap-2 font-mono text-sm font-bold text-[var(--color-text-primary)]">
             <Sparkles size={14} className="text-[var(--color-accent)]" />
-            AI 校正
+            AI Proofread
           </div>
           <button
             type="button"
@@ -365,14 +365,14 @@ export function ProofreadDialog({
             <div className="flex flex-col items-center gap-3 py-12">
               <RefreshCw size={22} className="animate-spin text-[var(--color-accent)]" />
               <p className="font-mono text-sm text-[var(--color-text-muted)]">
-                AIが校正中です。しばらくお待ちください...
+                AI is proofreading. please wait...
               </p>
             </div>
           )}
 
           {/* Error */}
           {phase === "error" && (
-            <div className="flex items-center gap-2 rounded border border-red-300 bg-red-50 px-4 py-3 font-mono text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 flex items-center gap-2 rounded border px-4 py-3 font-mono text-sm text-[var(--color-danger)]">
               <AlertCircle size={14} />
               {error}
             </div>
@@ -386,7 +386,7 @@ export function ProofreadDialog({
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                      タイトル提案
+                      title suggestion
                     </span>
                     <label className="flex cursor-pointer items-center gap-1.5 font-mono text-xs text-[var(--color-text-secondary)]">
                       <input
@@ -395,51 +395,45 @@ export function ProofreadDialog({
                         onChange={(e) => setApplyTitle(e.target.checked)}
                         className="accent-[var(--color-accent)]"
                       />
-                      このタイトルを適用する
+                      apply this title
                     </label>
                   </div>
                   <div className="rounded border border-[var(--color-border)] font-mono text-sm">
-                    <div className="flex items-start gap-2 border-b border-[var(--color-border)] bg-red-50 px-3 py-2 dark:bg-red-900/20">
-                      <span className="mt-0.5 shrink-0 text-xs text-red-600 dark:text-red-400">
-                        −
-                      </span>
-                      <span className="text-red-700 opacity-75 dark:text-red-300">
-                        {displayTitle}
-                      </span>
+                    <div className="bg-[var(--color-danger)]/10 flex items-start gap-2 border-b border-[var(--color-border)] px-3 py-2">
+                      <span className="mt-0.5 shrink-0 text-xs text-[var(--color-danger)]">−</span>
+                      <span className="text-[var(--color-danger)] opacity-75">{displayTitle}</span>
                     </div>
-                    <div className="flex items-start gap-2 bg-green-50 px-3 py-2 dark:bg-green-900/20">
-                      <span className="mt-0.5 shrink-0 text-xs text-green-600 dark:text-green-400">
-                        +
-                      </span>
-                      <span className="text-green-700 dark:text-green-300">{newTitle}</span>
+                    <div className="bg-[var(--color-success)]/10 flex items-start gap-2 px-3 py-2">
+                      <span className="mt-0.5 shrink-0 text-xs text-[var(--color-success)]">+</span>
+                      <span className="text-[var(--color-success)]">{newTitle}</span>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)]">
-                  <Check size={12} className="text-green-600" />
-                  タイトルは変更なし
+                  <Check size={12} className="text-[var(--color-success)]" />
+                  title unchanged
                 </div>
               )}
 
               {/* Content diff */}
               <div className="flex flex-col gap-2">
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                  本文の変更差分
+                  content diff
                 </span>
                 {contentChanged ? (
                   <DiffLines pairs={contentPairs} />
                 ) : (
                   <div className="flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)]">
-                    <Check size={12} className="text-green-600" />
-                    本文は変更なし
+                    <Check size={12} className="text-[var(--color-success)]" />
+                    content unchanged
                   </div>
                 )}
               </div>
 
               {!titleChanged && !contentChanged && (
                 <p className="py-4 text-center font-mono text-sm text-[var(--color-text-muted)]">
-                  修正は不要でした。文章・マークダウンに問題はありません。
+                  no corrections needed. text and markdown look good.
                 </p>
               )}
             </div>
@@ -449,12 +443,12 @@ export function ProofreadDialog({
         {/* Footer */}
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[var(--color-border)] px-5 py-3">
           <Button variant="ghost" size="md" onClick={handleClose}>
-            キャンセル
+            cancel
           </Button>
           {phase === "review" && (contentChanged || (titleChanged && applyTitle)) && (
             <Button variant="primary" size="md" onClick={handleApply}>
               <Check size={13} />
-              適用
+              apply
             </Button>
           )}
         </div>

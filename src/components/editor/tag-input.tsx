@@ -119,7 +119,7 @@ export function TagInput({
               setFocused(false);
               setTimeout(() => setShowSuggestions(false), 150);
             }}
-            placeholder={value.length === 0 ? "タグを入力…" : "タグを追加…"}
+            placeholder={value.length === 0 ? "add tag..." : "add tag..."}
             className={cn(
               "min-w-28 flex-1 bg-transparent font-mono text-sm outline-none",
               "text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
@@ -139,10 +139,10 @@ export function TagInput({
               "font-mono text-xs text-[var(--color-accent)]",
               "transition-colors duration-100 hover:bg-[var(--color-bg-hover)]"
             )}
-            title="追加 (Enter)"
+            title="add (Enter)"
           >
             <Plus size={11} />
-            追加
+            add
           </button>
         )}
       </div>
@@ -150,13 +150,13 @@ export function TagInput({
       {/* Hint — shown when focused, no suggestions, and has typed text */}
       {focused && !showSuggestions && inputVal.trim().length > 0 && (
         <p className="mt-1 font-mono text-xs text-[var(--color-text-muted)]">
-          入力後に{" "}
+          press{" "}
           <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">
             Enter
           </kbd>{" "}
-          または{" "}
+          or{" "}
           <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-xs">,</kbd>{" "}
-          で追加
+          to add
         </p>
       )}
 

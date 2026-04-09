@@ -26,8 +26,8 @@ export function DiffViewer({ oldText, newText, compact = false }: DiffViewerProp
 
   if (rawLines.every((l) => l.type === "unchanged")) {
     return (
-      <p className="text-sm text-[var(--color-text-muted)] font-mono py-4 text-center">
-        変更はありません。
+      <p className="py-4 text-center font-mono text-sm text-[var(--color-text-muted)]">
+        no changes.
       </p>
     );
   }
@@ -35,7 +35,7 @@ export function DiffViewer({ oldText, newText, compact = false }: DiffViewerProp
   const lines: RenderLine[] = compact ? collapseUnchanged(rawLines, 2) : rawLines;
 
   return (
-    <div className="overflow-x-auto rounded border border-[var(--color-border)] text-xs font-mono">
+    <div className="overflow-x-auto rounded border border-[var(--color-border)] font-mono text-xs">
       <table className="w-full border-collapse">
         <tbody>
           {lines.map((line, i) => {
@@ -46,7 +46,7 @@ export function DiffViewer({ oldText, newText, compact = false }: DiffViewerProp
                     colSpan={2}
                     className="select-none px-3 py-1 text-center text-[var(--color-text-muted)]"
                   >
-                    ⋯ {line.hidden} 行省略 ⋯
+                    ⋯ {line.hidden} lines hidden ⋯
                   </td>
                 </tr>
               );
@@ -55,25 +55,25 @@ export function DiffViewer({ oldText, newText, compact = false }: DiffViewerProp
               <tr
                 key={i}
                 className={cn(
-                  line.type === "added" && "bg-green-50 dark:bg-green-900/20",
-                  line.type === "removed" && "bg-red-50 dark:bg-red-900/20",
+                  line.type === "added" && "bg-[var(--color-success)]/10",
+                  line.type === "removed" && "bg-[var(--color-danger)]/10",
                   line.type === "unchanged" && "bg-[var(--color-bg-primary)]"
                 )}
               >
                 <td
                   className={cn(
-                    "select-none w-8 px-2 py-0.5 text-right border-r border-[var(--color-border)] text-[var(--color-text-muted)]",
-                    line.type === "added" && "text-green-600 dark:text-green-400",
-                    line.type === "removed" && "text-red-600 dark:text-red-400"
+                    "w-8 select-none border-r border-[var(--color-border)] px-2 py-0.5 text-right text-[var(--color-text-muted)]",
+                    line.type === "added" && "text-[var(--color-success)]",
+                    line.type === "removed" && "text-[var(--color-danger)]"
                   )}
                 >
                   {line.type === "added" ? "+" : line.type === "removed" ? "−" : " "}
                 </td>
                 <td
                   className={cn(
-                    "px-3 py-0.5 whitespace-pre-wrap break-all",
-                    line.type === "added" && "text-green-700 dark:text-green-300",
-                    line.type === "removed" && "text-red-700 dark:text-red-300 line-through opacity-75",
+                    "whitespace-pre-wrap break-all px-3 py-0.5",
+                    line.type === "added" && "text-[var(--color-success)]",
+                    line.type === "removed" && "text-[var(--color-danger)] line-through opacity-75",
                     line.type === "unchanged" && "text-[var(--color-text-secondary)]"
                   )}
                 >

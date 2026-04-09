@@ -131,7 +131,7 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
     } catch (err: unknown) {
       if (err instanceof Error && err.name !== "AbortError") {
         setStreamedText("[Error: AI request failed]");
-        toast.error("AIアシスト失敗");
+        toast.error("AI assist failed");
       }
     } finally {
       setStreaming(false);
@@ -177,8 +177,8 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
     setDiffState("accepted");
     setVisible(false);
     setStreamedText("");
-    const label = mode === "continue" ? "続きを生成" : mode === "rewrite" ? "書き換え" : "翻訳";
-    toast.success(`${label}を適用しました`);
+    const label = mode === "continue" ? "continue" : mode === "rewrite" ? "rewrite" : "translate";
+    toast.success(`Applied ${label}`);
   }
 
   function handleReject() {
@@ -255,13 +255,13 @@ export function AIAssistToolbar({ textareaRef, value, onChange, pageTitle }: AIA
                   onClick={handleAccept}
                   icon={<Check size={12} />}
                   label="Accept"
-                  className="text-green-600 hover:text-green-700"
+                  className="text-[var(--color-success)] hover:opacity-80"
                 />
                 <ToolbarBtn
                   onClick={handleReject}
                   icon={<X size={12} />}
                   label="Reject"
-                  className="text-red-500 hover:text-red-600"
+                  className="text-[var(--color-danger)] hover:opacity-80"
                 />
               </>
             )}

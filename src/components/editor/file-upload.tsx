@@ -24,9 +24,9 @@ const ACCEPTED = [
 ].join(",");
 
 const STATUS_LABELS: Record<string, string> = {
-  uploading: "アップロード中...",
-  extracting: "テキスト抽出中...",
-  converting: "Markdown変換中...",
+  uploading: "uploading...",
+  extracting: "extracting text...",
+  converting: "converting...",
 };
 
 export function FileUpload({ onInsert }: FileUploadProps) {
@@ -47,17 +47,17 @@ export function FileUpload({ onInsert }: FileUploadProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        const msg = data.error ?? "処理に失敗しました";
+        const msg = data.error ?? "Processing failed";
         setError(msg);
         toast.error(msg);
         return;
       }
 
       onInsert(`\n\n${data.markdown}\n\n`);
-      toast.success(`${file.name} を挿入しました`);
+      toast.success(`Inserted ${file.name}`);
     } catch {
-      setError("処理に失敗しました");
-      toast.error("ファイル処理に失敗しました");
+      setError("Processing failed");
+      toast.error("File processing failed");
     } finally {
       setStatus(null);
     }
@@ -65,7 +65,7 @@ export function FileUpload({ onInsert }: FileUploadProps) {
 
   const handleFile = (file: File) => {
     if (file.size > 30 * 1024 * 1024) {
-      setError("ファイルサイズが上限(30MB)を超えています");
+      setError("File size exceeds the 30MB limit");
       return;
     }
     process(file);
@@ -79,7 +79,7 @@ export function FileUpload({ onInsert }: FileUploadProps) {
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isLoading}
-        title="ファイルを添付してMarkdownに変換 (PDF, Word, Excel, PPT, 画像)"
+        title="Attach file and convert to Markdown (PDF, Word, Excel, PPT, image)"
         className={cn(
           "flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-xs",
           "text-[var(--color-text-muted)] transition-colors duration-100",
@@ -88,7 +88,7 @@ export function FileUpload({ onInsert }: FileUploadProps) {
         )}
       >
         {isLoading ? <Loader size={12} className="animate-spin" /> : <Paperclip size={12} />}
-        {isLoading ? STATUS_LABELS[status!] : "添付"}
+        {isLoading ? STATUS_LABELS[status!] : "attach"}
       </button>
 
       <input
@@ -104,7 +104,7 @@ export function FileUpload({ onInsert }: FileUploadProps) {
       />
 
       {error && (
-        <span className="absolute left-0 top-full z-10 mt-1 whitespace-nowrap rounded border border-red-300 bg-red-50 px-2 py-0.5 font-mono text-xs text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <span className="border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 absolute left-0 top-full z-10 mt-1 whitespace-nowrap rounded border px-2 py-0.5 font-mono text-xs text-[var(--color-danger)]">
           {error}
         </span>
       )}

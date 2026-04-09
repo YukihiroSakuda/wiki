@@ -2,8 +2,8 @@ import { cn } from "@/lib/utils";
 import { ButtonHTMLAttributes, forwardRef } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost" | "danger";
-  size?: "sm" | "md" | "lg";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "success";
+  size?: "xs" | "sm" | "md" | "lg";
   loading?: boolean;
 }
 
@@ -21,9 +21,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           "transition-colors duration-150",
           "disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale disabled:hover:translate-y-0 disabled:hover:shadow-none",
           // Sizes
-          size === "sm" && "px-2 py-1 text-sm",
-          size === "md" && "px-3 py-1.5 text-base",
-          size === "lg" && "px-4 py-2 text-md",
+          size === "xs" && "px-2 py-0.5 text-[10px]",
+          size === "sm" && "px-2 py-1 text-xs",
+          size === "md" && "px-3 py-1.5 text-sm",
+          size === "lg" && "px-4 py-2 text-base",
           // Variants
           variant === "primary" && [
             "border-[var(--color-accent)] bg-[var(--color-accent)] text-black",
@@ -40,8 +41,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             "hover:bg-[var(--color-bg-sidebar)] hover:text-[var(--color-text-primary)]",
           ],
           variant === "danger" && [
-            "border-red-300 bg-transparent text-red-500",
-            "hover:bg-red-50 dark:hover:bg-red-950",
+            "border-[var(--color-danger)] bg-transparent text-[var(--color-danger)]",
+            "hover:bg-[var(--color-danger)]/10",
+          ],
+          variant === "success" && [
+            "border-[var(--color-success)] bg-[var(--color-success)] text-white",
+            "hover:opacity-90",
           ],
           className
         )}

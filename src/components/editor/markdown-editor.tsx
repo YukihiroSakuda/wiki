@@ -21,32 +21,33 @@ interface Template {
 
 const TEMPLATES: Template[] = [
   // Headings
-  { label: "H1", title: "見出し 1", snippet: "# 見出し\n" },
-  { label: "H2", title: "見出し 2", snippet: "## 見出し\n" },
-  { label: "H3", title: "見出し 3", snippet: "### 見出し\n" },
+  { label: "H1", title: "Heading 1", snippet: "# Heading\n" },
+  { label: "H2", title: "Heading 2", snippet: "## Heading\n" },
+  { label: "H3", title: "Heading 3", snippet: "### Heading\n" },
   // Inline formatting
-  { label: "B", title: "太字", snippet: "**テキスト**", wrap: "**", cursorOffset: -2 },
-  { label: "I", title: "斜体", snippet: "_テキスト_", wrap: "_", cursorOffset: -1 },
-  { label: "`code`", title: "インラインコード", snippet: "`コード`", wrap: "`", cursorOffset: -1 },
+  { label: "B", title: "Bold", snippet: "**text**", wrap: "**", cursorOffset: -2 },
+  { label: "I", title: "Italic", snippet: "_text_", wrap: "_", cursorOffset: -1 },
+  { label: "`code`", title: "Inline code", snippet: "`code`", wrap: "`", cursorOffset: -1 },
   // Links / media
-  { label: "Link", title: "リンク", snippet: "[リンクテキスト](https://)", cursorOffset: -1 },
+  { label: "Link", title: "Link", snippet: "[link text](https://)", cursorOffset: -1 },
   // Blocks
   {
     label: "Table",
-    title: "テーブル",
-    snippet: "| 列1 | 列2 | 列3 |\n|---|---|---|\n| セル | セル | セル |\n| セル | セル | セル |\n",
+    title: "Table",
+    snippet:
+      "| col1 | col2 | col3 |\n|---|---|---|\n| cell | cell | cell |\n| cell | cell | cell |\n",
   },
-  { label: "• リスト", title: "箇条書き", snippet: "- 項目1\n- 項目2\n- 項目3\n" },
-  { label: "1. リスト", title: "番号付きリスト", snippet: "1. 項目1\n2. 項目2\n3. 項目3\n" },
-  { label: "☑ Todo", title: "チェックリスト", snippet: "- [ ] タスク1\n- [ ] タスク2\n- [x] 完了済み\n" },
-  { label: "Quote", title: "引用", snippet: "> 引用テキスト\n" },
+  { label: "• List", title: "Bullet list", snippet: "- item 1\n- item 2\n- item 3\n" },
+  { label: "1. List", title: "Numbered list", snippet: "1. item 1\n2. item 2\n3. item 3\n" },
+  { label: "☑ Todo", title: "Checklist", snippet: "- [ ] task 1\n- [ ] task 2\n- [x] done\n" },
+  { label: "Quote", title: "Blockquote", snippet: "> quote text\n" },
   {
     label: "```Code```",
-    title: "コードブロック",
-    snippet: "```\nここにコードを書く\n```\n",
+    title: "Code block",
+    snippet: "```\ncode here\n```\n",
     cursorOffset: -5,
   },
-  { label: "---", title: "区切り線", snippet: "\n---\n" },
+  { label: "---", title: "Divider", snippet: "\n---\n" },
 ];
 
 // Separator indices (after these template indices, render a separator)
@@ -65,7 +66,7 @@ interface MarkdownEditorProps {
 export function MarkdownEditor({
   value,
   onChange,
-  placeholder = "Markdownで書く...",
+  placeholder = "Write in Markdown...",
   textareaRef: externalRef,
   autocompleteSlot,
 }: MarkdownEditorProps) {
@@ -214,7 +215,10 @@ export function MarkdownEditor({
           <FileUpload
             onInsert={(md) => {
               const ta = textareaRef.current;
-              if (!ta) { onChange(value + md); return; }
+              if (!ta) {
+                onChange(value + md);
+                return;
+              }
               const pos = ta.selectionStart;
               onChange(value.substring(0, pos) + md + value.substring(pos));
               requestAnimationFrame(() => {
@@ -233,7 +237,11 @@ export function MarkdownEditor({
               <Columns size={13} />
             </ModeButton>
           </span>
-          <ModeButton active={mode === "preview"} onClick={() => setMode("preview")} title="Preview">
+          <ModeButton
+            active={mode === "preview"}
+            onClick={() => setMode("preview")}
+            title="Preview"
+          >
             <Eye size={13} />
           </ModeButton>
         </div>
@@ -304,7 +312,7 @@ export function MarkdownEditor({
               <PageContent content={preview} />
             ) : (
               <p className="font-mono text-sm italic text-[var(--color-text-muted)]">
-                プレビューするものがありません。
+                nothing to preview.
               </p>
             )}
           </div>

@@ -122,7 +122,7 @@ export function SettingsClient() {
         <p
           className={cn(
             "font-mono text-xs",
-            saved ? "text-green-600" : "text-[var(--color-text-muted)]"
+            saved ? "text-[var(--color-success)]" : "text-[var(--color-text-muted)]"
           )}
         >
           {saving ? "Saving..." : "Settings saved."}

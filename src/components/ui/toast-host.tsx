@@ -4,7 +4,8 @@ import { useToastStore, type ToastKind } from "@/stores/toast-store";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, AlertTriangle, XCircle, Info, X } from "lucide-react";
 
-const ICONS: Record<ToastKind, React.ComponentType<{ size?: number; className?: string }>> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ICONS: Record<ToastKind, React.ComponentType<any>> = {
   info: Info,
   success: CheckCircle2,
   warn: AlertTriangle,

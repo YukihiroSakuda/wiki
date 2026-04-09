@@ -67,10 +67,11 @@ export function PageContent({ content, pageMap, onWikiLinkClick }: PageContentPr
         "prose-ol:text-[var(--color-text-primary)] prose-ul:text-[var(--color-text-primary)]",
         "prose-li:my-1",
         // Tables
-        "prose-table:border prose-table:border-[var(--color-border)]",
-        "prose-th:bg-[var(--color-bg-sidebar)] prose-th:font-medium prose-th:text-[var(--color-text-primary)]",
-        "prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2",
-        "prose-th:border prose-th:border-[var(--color-border)] prose-td:border prose-td:border-[var(--color-border)]",
+        "prose-table:w-full prose-table:border-collapse prose-table:border prose-table:border-[var(--color-border-strong)]",
+        "prose-th:bg-[var(--color-bg-secondary)] prose-th:font-semibold prose-th:text-[var(--color-text-primary)]",
+        "prose-th:px-4 prose-th:py-2.5 prose-td:px-4 prose-td:py-2",
+        "prose-th:border prose-th:border-[var(--color-border-strong)] prose-td:border prose-td:border-[var(--color-border-strong)]",
+        "prose-td:text-[var(--color-text-primary)]",
         // HR
         "prose-hr:border-[var(--color-border)]",
         // Strong / em
@@ -81,6 +82,19 @@ export function PageContent({ content, pageMap, onWikiLinkClick }: PageContentPr
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug, rehypeHighlight]}
         components={{
+          table: ({ children }) => (
+            <div className="my-4 overflow-x-auto rounded border border-[var(--color-border-strong)]">
+              <table className="min-w-full border-collapse">{children}</table>
+            </div>
+          ),
+          tr: ({ children, ...props }) => (
+            <tr
+              className="transition-colors duration-100 odd:bg-[var(--color-bg-elevated)] even:bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-sidebar)]"
+              {...props}
+            >
+              {children}
+            </tr>
+          ),
           a: ({ href, children }) => {
             const isWikiLink = href?.startsWith("/wiki/");
             if (isWikiLink && onWikiLinkClick) {
