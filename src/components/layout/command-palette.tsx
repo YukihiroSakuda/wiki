@@ -426,7 +426,7 @@ export function CommandPalette() {
             </span>
             <span>esc close</span>
           </div>
-          <span className="text-[var(--color-text-dim)]">⌘K · command palette</span>
+          <span className="text-[var(--color-text-dim)]">Ctrl+K · command palette</span>
         </div>
       </div>
     </div>

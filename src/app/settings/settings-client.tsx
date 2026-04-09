@@ -4,6 +4,7 @@ import { useThemeStore, ACCENT_COLORS, type AccentColorName } from "@/stores/the
 import { cn } from "@/lib/utils";
 import { Check, Moon, Sun } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export function SettingsClient() {
   const { theme, accentColorName, setTheme, setAccentColor } = useThemeStore();
@@ -40,31 +41,35 @@ export function SettingsClient() {
     <div className="flex flex-col gap-8">
       {/* Theme */}
       <section>
-        <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
+        <h2 className="mb-3 font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           Appearance
         </h2>
         <div className="flex gap-2">
-          <ThemeButton
-            active={theme === "light"}
+          <Button
+            variant={theme === "light" ? "primary" : "secondary"}
+            size="sm"
             onClick={() => handleThemeChange("light")}
-            icon={<Sun size={14} />}
-            label="Light"
-          />
-          <ThemeButton
-            active={theme === "dark"}
+          >
+            <Sun size={14} />
+            Light
+          </Button>
+          <Button
+            variant={theme === "dark" ? "primary" : "secondary"}
+            size="sm"
             onClick={() => handleThemeChange("dark")}
-            icon={<Moon size={14} />}
-            label="Dark"
-          />
+          >
+            <Moon size={14} />
+            Dark
+          </Button>
         </div>
       </section>
 
       {/* Accent color */}
       <section>
-        <h2 className="mb-1 font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
+        <h2 className="mb-1 font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           Accent Color
         </h2>
-        <p className="mb-3 font-mono text-xs text-[var(--color-text-muted)]">
+        <p className="mb-3 font-mono text-xs text-[var(--color-text-dim)]">
           Currently: <span className="text-[var(--color-accent)]">{accentColorName}</span>
         </p>
         <div className="flex flex-wrap gap-2">
@@ -75,7 +80,7 @@ export function SettingsClient() {
               onClick={() => handleAccentChange(color.name)}
               title={color.name}
               className={cn(
-                "relative h-8 w-8 rounded border-2 transition-all duration-150",
+                "relative h-8 w-8 rounded border-2",
                 accentColorName === color.name
                   ? "scale-110 border-[var(--color-text-primary)]"
                   : "border-transparent hover:scale-105"
@@ -92,25 +97,25 @@ export function SettingsClient() {
 
       {/* Preview */}
       <section>
-        <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
+        <h2 className="mb-3 font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           Preview
         </h2>
-        <div className="rounded border border-[var(--color-border)] bg-[var(--color-bg-surface)] p-4 font-mono text-sm">
-          <p className="mb-2 text-[var(--color-text-primary)]">
+        <div className="rounded border border-[var(--color-border)] bg-[var(--color-bg-surface)] p-4">
+          <p className="mb-2 font-mono text-sm text-[var(--color-text-primary)]">
             This is how your Wiki looks with the current settings.
           </p>
           <a
             href="#"
-            className="text-[var(--color-accent)] hover:underline"
+            className="font-mono text-sm text-[var(--color-accent)] hover:underline"
             onClick={(e) => e.preventDefault()}
           >
             Accent colored link →
           </a>
           <div className="mt-3 flex gap-2">
-            <span className="rounded bg-[var(--color-accent)] px-2 py-0.5 text-xs text-white">
+            <span className="rounded bg-[var(--color-accent)] px-2 py-0.5 font-mono text-xs text-black">
               Tag
             </span>
-            <span className="rounded border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-text-secondary)]">
+            <span className="rounded border border-[var(--color-border)] px-2 py-0.5 font-mono text-xs text-[var(--color-text-secondary)]">
               Badge
             </span>
           </div>
@@ -129,33 +134,5 @@ export function SettingsClient() {
         </p>
       )}
     </div>
-  );
-}
-
-function ThemeButton({
-  active,
-  onClick,
-  icon,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-2 rounded border px-4 py-2 font-mono text-sm transition-colors duration-150",
-        active
-          ? "border-[var(--color-accent)] bg-[var(--color-bg-surface)] text-[var(--color-accent)]"
-          : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text-secondary)]"
-      )}
-    >
-      {icon}
-      {label}
-    </button>
   );
 }

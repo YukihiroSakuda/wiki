@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useThemeStore } from "@/stores/theme-store";
-import { Activity, Command, GitBranch, Wifi } from "lucide-react";
+import { Activity, GitBranch, Wifi } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function StatusBar() {
@@ -73,10 +73,7 @@ export function StatusBar() {
         <span className="text-[var(--color-text-dim)]">·</span>
         <span className="text-[var(--color-accent)]">@{accentColorName}</span>
         <span className="text-[var(--color-text-dim)]">·</span>
-        <span className="flex items-center gap-1">
-          <Command size={10} />
-          K
-        </span>
+        <span>Ctrl+K</span>
         <span className="text-[var(--color-text-dim)]">·</span>
         <span className="flex items-center gap-1">
           <Wifi size={10} className="text-[var(--color-accent)]" />

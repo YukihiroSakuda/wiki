@@ -54,7 +54,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (IS_AI_CONFIGURED) {
     const azure = getAzureClient()!;
     const { text } = await generateText({
-      model: azure(MODELS.CLAUDE_SONNET),
+      model: azure(MODELS.GPT_CHAT),
       prompt: PROMPTS.qaToWiki(question.title, question.content, bestAnswer.content, otherAnswers),
       maxOutputTokens: 3000,
     });

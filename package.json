@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@ai-sdk/azure": "^3.0.51",
+    "@ai-sdk/react": "^3.0.156",
     "@azure/identity": "^4.13.1",
     "@azure/search-documents": "^12.2.0",
     "@azure/storage-blob": "^12.31.0",
@@ -47,6 +48,7 @@
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.5.0",
     "xlsx": "^0.18.5",
+    "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },
   "devDependencies": {

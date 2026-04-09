@@ -27,7 +27,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           size === "lg" && "px-4 py-2 text-base",
           // Variants
           variant === "primary" && [
-            "border-[var(--color-accent)] bg-[var(--color-accent)] text-black",
+            "border-[var(--color-accent)] bg-[var(--color-accent)] text-white",
             "shadow-[0_0_12px_var(--color-accent-glow)]",
             "hover:border-[var(--color-accent-hover)] hover:bg-[var(--color-accent-hover)]",
             "hover:-translate-y-px hover:shadow-[0_0_20px_var(--color-accent-glow)]",

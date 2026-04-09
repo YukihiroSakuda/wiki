@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { useChatStore } from "@/stores/chat-store";
 import { ChatMessageBubble } from "./chat-message";
 import { PageContent } from "@/components/page-view/page-content";
@@ -8,6 +10,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { AutoResizeTextarea } from "@/components/ui/auto-resize-textarea";
 import { cn } from "@/lib/utils";
 import { Send, Trash2, X, Sparkles, ChevronLeft, ExternalLink } from "lucide-react";
+
+const chatTransport = new DefaultChatTransport({ api: "/api/ai/chat" });
 
 // ─── Page preview (drilldown within the panel) ───────────────────────────────
 
@@ -44,7 +48,6 @@ function PanelPagePreview({
 
   return (
     <>
-      {/* Preview header */}
       <div className="flex shrink-0 items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-bg-surface)] px-3 py-2">
         <button
           type="button"
@@ -67,7 +70,6 @@ function PanelPagePreview({
           <ExternalLink size={13} />
         </a>
       </div>
-      {/* Preview body */}
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {loading ? (
           <div className="flex justify-center py-10">
@@ -93,22 +95,31 @@ export function ChatPanel() {
   const {
     isOpen,
     close,
-    messages,
-    addMessage,
-    updateMessage,
-    clear,
+    setMessages: persistMessages,
+    clear: clearPersisted,
     pendingInput,
     setPendingInput,
   } = useChatStore();
+
+  const { messages, sendMessage, status, setMessages } = useChat({
+    transport: chatTransport,
+    messages: useChatStore.getState().messages,
+    onFinish: () => {
+      persistMessages(chatRef.current);
+    },
+  });
+
+  const chatRef = useRef(messages);
+  chatRef.current = messages;
+
   const [input, setInput] = useState("");
-  const [streamingId, setStreamingId] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ slug: string; title: string } | null>(null);
   const [pageMap, setPageMap] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
 
-  // Fetch title→slug map once on mount for wiki link resolution
+  const isStreaming = status === "streaming";
+
   useEffect(() => {
     fetch("/api/pages/map")
       .then((r) => r.json())
@@ -116,7 +127,6 @@ export function ChatPanel() {
       .catch(() => {});
   }, []);
 
-  // Consume pending input
   useEffect(() => {
     if (pendingInput && isOpen) {
       setInput(pendingInput);
@@ -125,12 +135,10 @@ export function ChatPanel() {
     }
   }, [pendingInput, isOpen, setPendingInput]);
 
-  // Auto-scroll
   useEffect(() => {
     if (!preview) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, preview]);
 
-  // Focus on open
   useEffect(() => {
     if (isOpen && !preview) setTimeout(() => inputRef.current?.focus(), 200);
   }, [isOpen, preview]);
@@ -139,96 +147,29 @@ export function ChatPanel() {
     setPreview({ slug, title });
   }, []);
 
-  const sendMessage = async () => {
+  const handleClear = () => {
+    setMessages([]);
+    clearPersisted();
+  };
+
+  const handleSend = () => {
     const text = input.trim();
-    if (!text || streamingId) return;
-
+    if (!text || isStreaming) return;
     setInput("");
-    addMessage({ role: "user", content: text });
-
-    const assistantId = addMessage({ role: "assistant", content: "" });
-    setStreamingId(assistantId);
-
-    if (abortRef.current) abortRef.current.abort();
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
-
-    try {
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [
-            ...messages.map((m) => ({ role: m.role, content: m.content })),
-            { role: "user", content: text },
-          ],
-        }),
-        signal: ctrl.signal,
-      });
-
-      if (!res.ok) {
-        updateMessage(assistantId, "Sorry, an error occurred. Please try again.");
-        return;
-      }
-
-      const reader = res.body?.getReader();
-      if (!reader) return;
-
-      const decoder = new TextDecoder();
-      let accumulated = "";
-      let sources: { slug: string; title: string }[] | undefined;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const sourceMarker = "\n\n__SOURCES__:";
-
-        if (chunk.includes(sourceMarker) || accumulated.includes(sourceMarker)) {
-          const full = accumulated + chunk;
-          const idx = full.indexOf(sourceMarker);
-          if (idx !== -1) {
-            const textPart = full.substring(0, idx);
-            const sourcePart = full.substring(idx + sourceMarker.length);
-            try {
-              sources = JSON.parse(sourcePart.trim());
-            } catch {
-              /* ignore */
-            }
-            accumulated = textPart;
-            updateMessage(assistantId, accumulated, sources);
-            break;
-          }
-        }
-
-        accumulated += chunk;
-        updateMessage(assistantId, accumulated);
-      }
-
-      if (sources !== undefined) updateMessage(assistantId, accumulated, sources);
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name !== "AbortError") {
-        updateMessage(assistantId, "Sorry, something went wrong.");
-      }
-    } finally {
-      setStreamingId(null);
-    }
+    sendMessage({ text });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSend();
     }
   };
 
   return (
     <>
-      {/* Mobile backdrop */}
       {isOpen && <div className="fixed inset-0 z-40 bg-black/20 sm:hidden" onClick={close} />}
 
-      {/* Panel */}
       <div
         className={cn(
           "fixed bottom-0 right-0 z-40 flex flex-col",
@@ -240,7 +181,6 @@ export function ChatPanel() {
         )}
       >
         {preview ? (
-          /* ── Page preview mode ── */
           <PanelPagePreview
             slug={preview.slug}
             title={preview.title}
@@ -248,7 +188,6 @@ export function ChatPanel() {
             onBack={() => setPreview(null)}
           />
         ) : (
-          /* ── Chat mode ── */
           <>
             {/* Header */}
             <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-surface)] px-3 py-2">
@@ -259,7 +198,7 @@ export function ChatPanel() {
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={clear}
+                  onClick={handleClear}
                   title="clear conversation"
                   className="flex items-center gap-1 rounded px-1.5 py-1 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-danger)]"
                 >
@@ -286,7 +225,7 @@ export function ChatPanel() {
                     Ask anything about the wiki.
                   </p>
                   <p className="font-mono text-xs text-[var(--color-text-muted)]">
-                    Powered by Claude + Azure AI Search
+                    Powered by Claude · agentic-rag
                   </p>
                 </div>
               ) : (
@@ -295,7 +234,11 @@ export function ChatPanel() {
                     <ChatMessageBubble
                       key={msg.id}
                       message={msg}
-                      isStreaming={streamingId === msg.id}
+                      isStreaming={
+                        isStreaming &&
+                        msg.id === messages[messages.length - 1]?.id &&
+                        msg.role === "assistant"
+                      }
                       onOpenPage={openPage}
                     />
                   ))}
@@ -322,8 +265,8 @@ export function ChatPanel() {
                 />
                 <button
                   type="button"
-                  onClick={sendMessage}
-                  disabled={!input.trim() || !!streamingId}
+                  onClick={handleSend}
+                  disabled={!input.trim() || isStreaming}
                   className={cn(
                     "flex h-9 w-9 shrink-0 items-center justify-center self-end rounded",
                     "bg-[var(--color-accent)] text-white transition-colors duration-150",

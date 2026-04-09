@@ -2,15 +2,21 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { MainLayout } from "@/components/layout/main-layout";
 import { ChatMessageBubble } from "@/components/ai-chat/chat-message";
 import { PageContent } from "@/components/page-view/page-content";
 import { Spinner } from "@/components/ui/spinner";
 import { AutoResizeTextarea } from "@/components/ui/auto-resize-textarea";
-import { useChatStore, type ChatMessage } from "@/stores/chat-store";
+import { useChatStore } from "@/stores/chat-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Send, Trash2, Sparkles, X, ExternalLink, ChevronLeft } from "lucide-react";
+
+// ─── Shared transport (created once) ─────────────────────────────────────────
+
+const chatTransport = new DefaultChatTransport({ api: "/api/ai/chat" });
 
 // ─── Page preview panel ───────────────────────────────────────────────────────
 
@@ -47,7 +53,6 @@ function PagePreviewPanel({
 
   return (
     <div className="flex w-[460px] shrink-0 flex-col rounded border border-[var(--color-border)] bg-[var(--color-bg-surface)]">
-      {/* Header */}
       <div className="flex shrink-0 items-center gap-2 border-b border-[var(--color-border)] px-3 py-2">
         <button
           type="button"
@@ -77,7 +82,6 @@ function PagePreviewPanel({
           <X size={13} />
         </button>
       </div>
-      {/* Body */}
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {loading ? (
           <div className="flex justify-center py-12">
@@ -103,14 +107,25 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
 
-  const { messages, addMessage, updateMessage, clear } = useChatStore();
+  const { setMessages: persistMessages, clear: clearPersisted } = useChatStore();
   const [input, setInput] = useState(initialQ);
-  const [streamingId, setStreamingId] = useState<string | null>(null);
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
+
+  const { messages, sendMessage, status, setMessages } = useChat({
+    transport: chatTransport,
+    messages: useChatStore.getState().messages,
+    onFinish: () => {
+      persistMessages(chatRef.current);
+    },
+  });
+
+  const chatRef = useRef(messages);
+  chatRef.current = messages;
+
+  const isStreaming = status === "streaming";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -125,91 +140,27 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
     setPreviewTitle(title);
   }, []);
 
-  const sendMessage = async (text?: string) => {
-    const t = (text ?? input).trim();
-    if (!t || streamingId) return;
+  const handleClear = () => {
+    setMessages([]);
+    clearPersisted();
+  };
 
+  const handleSend = () => {
+    const text = input.trim();
+    if (!text || isStreaming) return;
     setInput("");
-    const userMsg: Omit<ChatMessage, "id" | "createdAt"> = { role: "user", content: t };
-    addMessage(userMsg);
-
-    const assistantId = addMessage({ role: "assistant", content: "" });
-    setStreamingId(assistantId);
-
-    if (abortRef.current) abortRef.current.abort();
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
-
-    try {
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages.map((m) => ({ role: m.role, content: m.content })), userMsg],
-        }),
-        signal: ctrl.signal,
-      });
-
-      if (!res.ok) {
-        updateMessage(assistantId, "An error occurred. Please try again.");
-        return;
-      }
-
-      const reader = res.body?.getReader();
-      if (!reader) return;
-
-      const decoder = new TextDecoder();
-      let accumulated = "";
-      let sources: { slug: string; title: string }[] | undefined;
-      const SOURCE_MARKER = "\n\n__SOURCES__:";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const combined = accumulated + chunk;
-        const idx = combined.indexOf(SOURCE_MARKER);
-
-        if (idx !== -1) {
-          const textPart = combined.substring(0, idx);
-          const sourcePart = combined.substring(idx + SOURCE_MARKER.length);
-          try {
-            sources = JSON.parse(sourcePart.trim());
-          } catch {
-            // ignore
-          }
-          accumulated = textPart;
-          updateMessage(assistantId, accumulated, sources ?? []);
-          break;
-        }
-
-        accumulated = combined;
-        updateMessage(assistantId, accumulated);
-      }
-
-      if (sources !== undefined) {
-        updateMessage(assistantId, accumulated, sources);
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name !== "AbortError") {
-        updateMessage(assistantId, "Something went wrong.");
-      }
-    } finally {
-      setStreamingId(null);
-    }
+    sendMessage({ text });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSend();
     }
   };
 
   return (
     <div className="flex h-full min-h-0 gap-3">
-      {/* ── Main chat column ── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* HUD Header */}
         <div className="mb-3 flex items-center justify-between rounded border border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] px-3 py-2 shadow-[0_0_20px_var(--color-accent-glow)]">
@@ -222,7 +173,7 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
             <span className="text-[10px] text-[var(--color-text-dim)]">·</span>
             <span className="text-[10px] text-[var(--color-text-muted)]">claude-sonnet</span>
             <span className="text-[10px] text-[var(--color-text-dim)]">·</span>
-            <span className="text-[10px] text-[var(--color-text-muted)]">RAG: azure-search</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">agentic-rag</span>
             <span className="text-[10px] text-[var(--color-text-dim)]">·</span>
             <span className="text-[10px] text-[var(--color-text-muted)]">
               msgs: {messages.length}
@@ -232,7 +183,7 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
             type="button"
             variant="danger"
             size="sm"
-            onClick={clear}
+            onClick={handleClear}
             title="clear conversation"
           >
             <Trash2 size={10} />
@@ -260,7 +211,7 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
                 <span className="text-[var(--color-accent)]">❯</span> ask anything about the wiki
               </p>
               <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
-                [ claude · azure-search · ready ]
+                [ claude · agentic-rag · ready ]
               </p>
             </div>
           ) : (
@@ -269,7 +220,11 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
                 <ChatMessageBubble
                   key={msg.id}
                   message={msg}
-                  isStreaming={streamingId === msg.id}
+                  isStreaming={
+                    isStreaming &&
+                    msg.id === messages[messages.length - 1]?.id &&
+                    msg.role === "assistant"
+                  }
                   onOpenPage={openPage}
                 />
               ))}
@@ -306,8 +261,8 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
               type="button"
               variant="primary"
               size="sm"
-              onClick={() => sendMessage()}
-              disabled={!input.trim() || !!streamingId}
+              onClick={handleSend}
+              disabled={!input.trim() || isStreaming}
               className="self-end"
             >
               <Send size={11} />
@@ -317,7 +272,6 @@ function ChatPageContent({ pageMap }: { pageMap: Record<string, string> }) {
         </div>
       </div>
 
-      {/* ── Right preview panel ── */}
       {previewSlug && (
         <PagePreviewPanel
           slug={previewSlug}

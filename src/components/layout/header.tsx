@@ -159,7 +159,7 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
               placeholder="grep wiki --query ..."
               className={cn(
                 "flex-1 bg-transparent font-mono text-[13px]",
-                "text-[var(--color-text-primary)] placeholder:text-[var(--color-text-dim)] outline-none"
+                "text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-dim)]"
               )}
             />
             {query ? (
@@ -172,7 +172,7 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
               </button>
             ) : (
               <kbd className="hidden select-none items-center gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-1.5 py-0.5 font-mono text-[9px] text-[var(--color-text-muted)] sm:flex">
-                ⌘K
+                Ctrl+K
               </kbd>
             )}
           </div>

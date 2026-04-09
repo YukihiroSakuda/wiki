@@ -29,25 +29,8 @@ export async function buildRagContext(query: string): Promise<RagContext> {
     // Local fallback: Prisma LIKE search
     const { results } = await searchPages(query, { limit: 5 });
     sources = results.map((r) => ({ slug: r.slug, title: r.title }));
-    contextText = results
-      .map((r) => `## ${r.title}\n${r.excerpt}`)
-      .join("\n\n---\n\n");
+    contextText = results.map((r) => `## ${r.title}\n${r.excerpt}`).join("\n\n---\n\n");
   }
 
   return { contextText, sources };
-}
-
-/**
- * Heuristic: escalate to Opus for complex queries.
- * Complex = long question, multiple sub-questions, or asks for comparison/analysis.
- */
-export function shouldUseOpus(messages: { role: string; content: string }[]): boolean {
-  const lastUser = [...messages].reverse().find((m) => m.role === "user");
-  if (!lastUser) return false;
-  const text = lastUser.content;
-  return (
-    text.length > 300 ||
-    (text.match(/\?/g) ?? []).length >= 3 ||
-    /compare|analyze|explain in detail|summarize all|architecture/i.test(text)
-  );
 }
