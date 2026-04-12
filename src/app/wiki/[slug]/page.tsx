@@ -9,8 +9,9 @@ import { RightSidebar } from "@/components/layout/right-sidebar";
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Edit, Clock, User, Eye } from "lucide-react";
+import { Edit, Clock, User, Eye, MessageSquare } from "lucide-react";
 import GithubSlugger from "github-slugger";
+import { CommentSection } from "@/components/comments/comment-section";
 
 interface Props {
   params: { slug: string };
@@ -26,7 +27,7 @@ async function getPage(slug: string) {
       incomingLinks: {
         include: { sourcePage: { select: { slug: true, title: true } } },
       },
-      _count: { select: { pageViews: true, likes: true } },
+      _count: { select: { pageViews: true, likes: true, comments: true } },
     },
   });
 }
@@ -131,6 +132,13 @@ export default async function PageViewPage({ params }: Props) {
             >
               History
             </Link>
+            <a
+              href="#comments"
+              className="flex items-center gap-1 transition-colors duration-150 hover:text-[var(--color-accent)]"
+            >
+              <MessageSquare size={11} />
+              {page._count.comments}
+            </a>
           </div>
 
           {page.tags.length > 0 && (
@@ -148,6 +156,11 @@ export default async function PageViewPage({ params }: Props) {
 
         {/* Page content */}
         <PageContent content={page.content} pageMap={pageMap} />
+
+        {/* Comments */}
+        <div id="comments">
+          <CommentSection slug={page.slug} currentUserId={session?.user?.id} />
+        </div>
 
         {/* Mobile-only accordion (desktop handled by MainLayout's fixed aside) */}
         <RightSidebar

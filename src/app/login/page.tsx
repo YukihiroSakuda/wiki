@@ -46,7 +46,7 @@ export default function LoginPage() {
           {/* Logo / Title */}
           <div className="mb-8">
             <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)]">
-              Internal Wiki
+              Knowledge Hub
             </h1>
             <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
               Sign in to access the knowledge base

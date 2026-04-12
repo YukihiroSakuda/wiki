@@ -4,8 +4,8 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { KeyboardShortcuts } from "@/components/providers/keyboard-shortcuts";
 
 export const metadata: Metadata = {
-  title: "Internal Wiki",
-  description: "Internal knowledge base powered by LLM",
+  title: "Knowledge Hub",
+  description: "AI-powered knowledge base",
 };
 
 export default function RootLayout({

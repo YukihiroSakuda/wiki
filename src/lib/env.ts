@@ -16,7 +16,8 @@ export const env = {
   // Azure AI Foundry
   AZURE_AI_FOUNDRY_ENDPOINT: process.env.AZURE_AI_FOUNDRY_ENDPOINT ?? "",
   AZURE_AI_FOUNDRY_API_KEY: process.env.AZURE_AI_FOUNDRY_API_KEY ?? "",
-  AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT: process.env.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT ?? "text-embedding-3-large",
+  AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT:
+    process.env.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT ?? "text-embedding-3-large",
 
   // Azure AI Search
   AZURE_AI_SEARCH_ENDPOINT: process.env.AZURE_AI_SEARCH_ENDPOINT ?? "",
@@ -28,16 +29,17 @@ export const env = {
   AZURE_STORAGE_CONTAINER_NAME: process.env.AZURE_STORAGE_CONTAINER_NAME ?? "wiki-uploads",
 
   // App
-  APP_NAME: process.env.NEXT_PUBLIC_APP_NAME ?? "Internal Wiki",
+  APP_NAME: process.env.NEXT_PUBLIC_APP_NAME ?? "Knowledge Hub",
 
   // Helpers
   isAzureAIConfigured: () =>
     !!process.env.AZURE_AI_FOUNDRY_ENDPOINT && !!process.env.AZURE_AI_FOUNDRY_API_KEY,
   isAzureADConfigured: () =>
-    !!process.env.AZURE_AD_CLIENT_ID && !!process.env.AZURE_AD_CLIENT_SECRET && !!process.env.AZURE_AD_TENANT_ID,
+    !!process.env.AZURE_AD_CLIENT_ID &&
+    !!process.env.AZURE_AD_CLIENT_SECRET &&
+    !!process.env.AZURE_AD_TENANT_ID,
   isAzureSearchConfigured: () =>
     !!process.env.AZURE_AI_SEARCH_ENDPOINT && !!process.env.AZURE_AI_SEARCH_API_KEY,
-  isAzureStorageConfigured: () =>
-    !!process.env.AZURE_STORAGE_CONNECTION_STRING,
+  isAzureStorageConfigured: () => !!process.env.AZURE_STORAGE_CONNECTION_STRING,
   isDev: () => process.env.NODE_ENV === "development",
 };

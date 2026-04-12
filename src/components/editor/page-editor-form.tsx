@@ -12,7 +12,9 @@ import { ProofreadDialog } from "./proofread-dialog";
 import { SideBySideDiff, computeLinePairs, countLinePairs } from "./side-by-side-diff";
 import { cn } from "@/lib/utils";
 import { toast } from "@/stores/toast-store";
-import { Save, Trash2, AlertCircle, Sparkles, ScanText } from "lucide-react";
+import { TemplatePickerDialog } from "./template-picker-dialog";
+import { SaveAsTemplateDialog } from "./save-as-template-dialog";
+import { Save, Trash2, AlertCircle, Sparkles, ScanText, LayoutTemplate } from "lucide-react";
 
 interface PageEditorFormProps {
   slug?: string;
@@ -40,6 +42,8 @@ export function PageEditorForm({
   const [suggestingTags, setSuggestingTags] = useState(false);
   const [proofreadOpen, setProofreadOpen] = useState(false);
   const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
+  const [saveAsTemplateOpen, setSaveAsTemplateOpen] = useState(false);
   const baselineRef = useRef(initialContent);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -168,6 +172,30 @@ export function PageEditorForm({
           }}
         />
         <div className="flex shrink-0 items-center gap-2">
+          {isNew && (
+            <button
+              type="button"
+              onClick={() => setTemplatePickerOpen(true)}
+              disabled={saving}
+              className="flex items-center gap-1 rounded px-2 py-1 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-accent)] disabled:opacity-50"
+              title="Choose a template"
+            >
+              <LayoutTemplate size={12} />
+              template
+            </button>
+          )}
+          {!isNew && (
+            <button
+              type="button"
+              onClick={() => setSaveAsTemplateOpen(true)}
+              disabled={saving || deleting}
+              className="flex items-center gap-1 rounded px-2 py-1 font-mono text-xs text-[var(--color-text-muted)] transition-colors duration-100 hover:text-[var(--color-accent)] disabled:opacity-50"
+              title="Save current content as a reusable template"
+            >
+              <LayoutTemplate size={12} />
+              save as template
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setProofreadOpen(true)}
@@ -289,6 +317,24 @@ export function PageEditorForm({
           setTitle(newTitle);
           setContent(newContent);
         }}
+      />
+
+      {/* ── Template picker dialog (new pages) ── */}
+      <TemplatePickerDialog
+        open={templatePickerOpen}
+        onClose={() => setTemplatePickerOpen(false)}
+        onSelect={(tpl) => {
+          if (tpl.content) setContent(tpl.content);
+          if (tpl.name && !title.trim()) setTitle(tpl.name);
+        }}
+      />
+
+      {/* ── Save as template dialog (existing pages) ── */}
+      <SaveAsTemplateDialog
+        open={saveAsTemplateOpen}
+        onClose={() => setSaveAsTemplateOpen(false)}
+        defaultName={title}
+        content={content}
       />
     </div>
   );

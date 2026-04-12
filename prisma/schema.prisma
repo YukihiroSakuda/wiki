@@ -22,6 +22,8 @@ model User {
   pageLikes PageLike[]
   questions Question[]
   answers   Answer[]
+  comments  Comment[]
+  templates Template[]
 }
 
 model Page {
@@ -42,6 +44,7 @@ model Page {
 
   outgoingLinks PageLink[] @relation("SourcePage")
   incomingLinks PageLink[] @relation("TargetPage")
+  comments      Comment[]
 }
 
 model Tag {
@@ -146,4 +149,38 @@ model Answer {
 
   @@index([questionId])
   @@index([authorId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  pageId    String
+  authorId  String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page    Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  author  User      @relation(fields: [authorId], references: [id])
+  parent  Comment?  @relation("CommentThread", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentThread")
+
+  @@index([pageId])
+  @@index([parentId])
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  content     String   @default("")
+  category    String   @default("general")
+  authorId    String
+  isBuiltIn   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([category])
 }

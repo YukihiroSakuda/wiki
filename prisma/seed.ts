@@ -229,6 +229,298 @@ See [[Frontend Architecture]] for the app structure.`,
     ["devops", "guide"]
   );
 
+  // Seed built-in templates
+  const templates = [
+    {
+      name: "Procedure",
+      description: "Step-by-step procedure or runbook",
+      category: "procedure",
+      content: `# Procedure Title
+
+## Overview
+
+Brief description of what this procedure covers and when to use it.
+
+## Prerequisites
+
+- [ ] Prerequisite 1
+- [ ] Prerequisite 2
+
+## Steps
+
+### 1. First Step
+
+Description of the first step.
+
+\`\`\`bash
+# commands if applicable
+\`\`\`
+
+### 2. Second Step
+
+Description of the second step.
+
+### 3. Third Step
+
+Description of the third step.
+
+## Verification
+
+How to verify the procedure was successful.
+
+## Rollback
+
+Steps to undo the changes if something goes wrong.
+
+## References
+
+- Related page: [[Getting Started]]
+`,
+    },
+    {
+      name: "Meeting Notes",
+      description: "Structured meeting notes with agenda and action items",
+      category: "meeting",
+      content: `# Meeting: [Topic]
+
+**Date:** YYYY-MM-DD
+**Attendees:** @name1, @name2, @name3
+
+## Agenda
+
+1. Topic A
+2. Topic B
+3. Topic C
+
+## Discussion
+
+### Topic A
+
+Key points discussed.
+
+### Topic B
+
+Key points discussed.
+
+## Decisions
+
+| # | Decision | Owner |
+|---|----------|-------|
+| 1 | Decision description | @owner |
+| 2 | Decision description | @owner |
+
+## Action Items
+
+- [ ] Action item 1 — @owner (due: YYYY-MM-DD)
+- [ ] Action item 2 — @owner (due: YYYY-MM-DD)
+
+## Next Meeting
+
+Date and topics for the next meeting.
+`,
+    },
+    {
+      name: "Incident Report",
+      description: "Post-incident report with timeline and root cause analysis",
+      category: "incident",
+      content: `# Incident Report: [Title]
+
+**Severity:** P1 / P2 / P3 / P4
+**Date:** YYYY-MM-DD
+**Duration:** HH:MM
+**Status:** Resolved / Investigating / Monitoring
+
+## Summary
+
+One paragraph describing what happened and its impact.
+
+## Timeline
+
+| Time (UTC) | Event |
+|------------|-------|
+| HH:MM | First alert triggered |
+| HH:MM | Investigation started |
+| HH:MM | Root cause identified |
+| HH:MM | Fix deployed |
+| HH:MM | Incident resolved |
+
+## Impact
+
+- Number of users affected
+- Services impacted
+- Data loss (if any)
+
+## Root Cause
+
+Detailed description of the root cause.
+
+## Resolution
+
+What was done to resolve the incident.
+
+## Action Items
+
+- [ ] Preventive measure 1 — @owner
+- [ ] Preventive measure 2 — @owner
+- [ ] Monitoring improvement — @owner
+
+## Lessons Learned
+
+What we learned from this incident.
+`,
+    },
+    {
+      name: "Design Document",
+      description: "Technical design document for new features or systems",
+      category: "design",
+      content: `# Design: [Feature/System Name]
+
+**Author:** @name
+**Status:** Draft / In Review / Approved
+**Date:** YYYY-MM-DD
+
+## Context
+
+Why this design is needed. What problem are we solving?
+
+## Goals
+
+- Goal 1
+- Goal 2
+
+## Non-Goals
+
+- Non-goal 1
+
+## Proposed Design
+
+### Overview
+
+High-level description of the proposed solution.
+
+### Architecture
+
+Describe the architecture and key components.
+
+\`\`\`
+[Diagram or component layout]
+\`\`\`
+
+### Data Model
+
+Describe data model changes if applicable.
+
+### API Changes
+
+Describe API changes if applicable.
+
+## Alternatives Considered
+
+### Alternative A
+
+Description and why it was rejected.
+
+### Alternative B
+
+Description and why it was rejected.
+
+## Security Considerations
+
+- Authentication / authorization impacts
+- Data handling concerns
+
+## Testing Plan
+
+How this will be tested.
+
+## Rollout Plan
+
+How this will be deployed and rolled out.
+
+## Open Questions
+
+- Question 1
+- Question 2
+`,
+    },
+    {
+      name: "Onboarding Guide",
+      description: "New team member onboarding checklist",
+      category: "onboarding",
+      content: `# Onboarding: [Team/Role Name]
+
+Welcome to the team! This guide will help you get set up.
+
+## Day 1
+
+- [ ] Get access to email and Slack
+- [ ] Set up development environment
+- [ ] Read [[Getting Started]]
+- [ ] Meet with your buddy/mentor
+
+## Week 1
+
+- [ ] Complete security training
+- [ ] Read team wiki pages
+- [ ] Set up local development
+- [ ] Make your first PR (starter task)
+
+## Environment Setup
+
+### Prerequisites
+
+- Node.js (v20+)
+- Git
+- VS Code (recommended)
+
+### Steps
+
+\`\`\`bash
+git clone <repo-url>
+cd <project>
+npm install
+cp .env.example .env.local
+npm run dev
+\`\`\`
+
+## Key Resources
+
+| Resource | Link |
+|----------|------|
+| Repository | [GitHub](#) |
+| CI/CD | [GitHub Actions](#) |
+| Monitoring | [Dashboard](#) |
+
+## Key Contacts
+
+| Role | Name |
+|------|------|
+| Team Lead | @name |
+| Buddy | @name |
+
+## FAQ
+
+**Q: How do I deploy?**
+A: See [[Deployment Guide]]
+`,
+    },
+  ];
+
+  for (const tpl of templates) {
+    const existing = await prisma.template.findFirst({
+      where: { name: tpl.name, isBuiltIn: true },
+    });
+    if (!existing) {
+      await prisma.template.create({
+        data: {
+          ...tpl,
+          authorId: user.id,
+          isBuiltIn: true,
+        },
+      });
+    }
+  }
+
   // Add page views for "frequently viewed"
   await prisma.pageView.createMany({
     data: [
@@ -263,6 +555,7 @@ See [[Frontend Architecture]] for the app structure.`,
   console.log(`  Users: 1`);
   console.log(`  Pages: 5`);
   console.log(`  Tags: ${tags.length}`);
+  console.log(`  Templates: ${templates.length}`);
 }
 
 main()

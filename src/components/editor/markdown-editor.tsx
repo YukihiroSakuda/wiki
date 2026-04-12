@@ -4,7 +4,106 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { PageContent } from "@/components/page-view/page-content";
 import { FileUpload } from "./file-upload";
 import { cn } from "@/lib/utils";
-import { Eye, Code, Columns } from "lucide-react";
+import { Eye, Code, Columns, Undo2, Redo2 } from "lucide-react";
+
+// ─── Undo / Redo hook ────────────────────────────────────────────────────────
+
+interface HistoryEntry {
+  value: string;
+  cursor: number;
+}
+
+const MAX_HISTORY = 200;
+const DEBOUNCE_MS = 300;
+
+function useUndoRedo(
+  value: string,
+  onChange: (v: string) => void,
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>
+) {
+  const pastRef = useRef<HistoryEntry[]>([{ value, cursor: 0 }]);
+  const futureRef = useRef<HistoryEntry[]>([]);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPushedRef = useRef(value);
+
+  // Push current state to history (debounced to batch rapid keystrokes)
+  const pushHistory = useCallback(
+    (newValue: string) => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        if (newValue === lastPushedRef.current) return;
+        const cursor = textareaRef.current?.selectionStart ?? 0;
+        pastRef.current = [...pastRef.current.slice(-MAX_HISTORY + 1), { value: newValue, cursor }];
+        futureRef.current = [];
+        lastPushedRef.current = newValue;
+      }, DEBOUNCE_MS);
+    },
+    [textareaRef]
+  );
+
+  const undo = useCallback(() => {
+    // Flush any pending debounced push
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    const past = pastRef.current;
+    if (past.length <= 1) return;
+
+    // If current value differs from top of past, push it to future first
+    const currentCursor = textareaRef.current?.selectionStart ?? 0;
+    if (value !== past[past.length - 1].value) {
+      futureRef.current = [{ value, cursor: currentCursor }, ...futureRef.current];
+      const entry = past[past.length - 1];
+      onChange(entry.value);
+      lastPushedRef.current = entry.value;
+      requestAnimationFrame(() => {
+        const ta = textareaRef.current;
+        if (ta) ta.selectionStart = ta.selectionEnd = entry.cursor;
+      });
+      return;
+    }
+
+    const entry = past[past.length - 1];
+    futureRef.current = [entry, ...futureRef.current];
+    pastRef.current = past.slice(0, -1);
+    const prev = pastRef.current[pastRef.current.length - 1];
+    onChange(prev.value);
+    lastPushedRef.current = prev.value;
+    requestAnimationFrame(() => {
+      const ta = textareaRef.current;
+      if (ta) ta.selectionStart = ta.selectionEnd = prev.cursor;
+    });
+  }, [value, onChange, textareaRef]);
+
+  const redo = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    const future = futureRef.current;
+    if (future.length === 0) return;
+
+    const entry = future[0];
+    futureRef.current = future.slice(1);
+    const currentCursor = textareaRef.current?.selectionStart ?? 0;
+    pastRef.current = [...pastRef.current, { value, cursor: currentCursor }];
+    onChange(entry.value);
+    lastPushedRef.current = entry.value;
+    requestAnimationFrame(() => {
+      const ta = textareaRef.current;
+      if (ta) ta.selectionStart = ta.selectionEnd = entry.cursor;
+    });
+  }, [value, onChange, textareaRef]);
+
+  const canUndo =
+    pastRef.current.length > 1 || value !== pastRef.current[pastRef.current.length - 1]?.value;
+  const canRedo = futureRef.current.length > 0;
+
+  return { pushHistory, undo, redo, canUndo, canRedo };
+}
 
 type ViewMode = "write" | "preview" | "split";
 
@@ -75,6 +174,7 @@ export function MarkdownEditor({
   const textareaRef = externalRef ?? internalRef;
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [preview, setPreview] = useState(value);
+  const { pushHistory, undo, redo, canUndo, canRedo } = useUndoRedo(value, onChange, textareaRef);
 
   // Debounce preview update
   useEffect(() => {
@@ -122,17 +222,30 @@ export function MarkdownEditor({
 
       const newVal = value.substring(0, start) + insertion + value.substring(end);
       onChange(newVal);
+      pushHistory(newVal);
       requestAnimationFrame(() => {
         ta.selectionStart = ta.selectionEnd = newCursor;
         ta.focus();
       });
     },
-    [value, onChange, textareaRef]
+    [value, onChange, textareaRef, pushHistory]
   );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       const ta = e.currentTarget;
+
+      // Undo / Redo
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+        return;
+      }
 
       if (e.key === "Tab") {
         e.preventDefault();
@@ -198,11 +311,13 @@ export function MarkdownEditor({
         }
       }
     },
-    [value, onChange]
+    [value, onChange, undo, redo]
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+    const v = e.target.value;
+    onChange(v);
+    pushHistory(v);
   };
 
   return (
@@ -211,6 +326,25 @@ export function MarkdownEditor({
       <div className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-sidebar)] px-3 py-1.5">
         <div className="flex items-center gap-1">
           <span className="font-mono text-xs text-[var(--color-text-muted)]">Markdown</span>
+          <span className="text-[var(--color-border)]">·</span>
+          <button
+            type="button"
+            onClick={undo}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+            className="flex h-6 w-6 items-center justify-center rounded text-[var(--color-text-secondary)] transition-colors duration-100 hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] disabled:opacity-30 disabled:hover:bg-transparent"
+          >
+            <Undo2 size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={redo}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Y)"
+            className="flex h-6 w-6 items-center justify-center rounded text-[var(--color-text-secondary)] transition-colors duration-100 hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] disabled:opacity-30 disabled:hover:bg-transparent"
+          >
+            <Redo2 size={13} />
+          </button>
           <span className="text-[var(--color-border)]">·</span>
           <FileUpload
             onInsert={(md) => {

@@ -2,6 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { MainLayout } from "@/components/layout/main-layout";
 import { PagesClient } from "@/components/pages/pages-client";
 
+interface Props {
+  searchParams: { q?: string };
+}
+
 async function getInitialData() {
   const [pages, tags] = await Promise.all([
     prisma.page.findMany({
@@ -20,12 +24,13 @@ async function getInitialData() {
   return { pages, tags };
 }
 
-export default async function PagesPage() {
+export default async function PagesPage({ searchParams }: Props) {
   const { pages, tags } = await getInitialData();
 
   return (
     <MainLayout>
       <PagesClient
+        initialQuery={searchParams.q ?? ""}
         initialPages={pages.map((p) => ({
           slug: p.slug,
           title: p.title,

@@ -17,7 +17,7 @@ interface QuickResult {
   excerpt: string;
 }
 
-export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderProps) {
+export function Header({ onToggleSidebar, appName = "Knowledge Hub" }: HeaderProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<QuickResult[]>([]);
   const [open, setOpen] = useState(false);
@@ -69,7 +69,7 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
     const q = query.trim();
     if (!q) return;
     setOpen(false);
-    router.push(`/search?q=${encodeURIComponent(q)}`);
+    router.push(`/pages?q=${encodeURIComponent(q)}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -216,7 +216,7 @@ export function Header({ onToggleSidebar, appName = "Internal Wiki" }: HeaderPro
               </Link>
             ))}
             <Link
-              href={`/search?q=${encodeURIComponent(query)}`}
+              href={`/pages?q=${encodeURIComponent(query)}`}
               onClick={() => setOpen(false)}
               className="block border-t border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-accent)]"
             >

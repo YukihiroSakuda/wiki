@@ -131,13 +131,6 @@ export function LeftSidebar({ isOpen }: LeftSidebarProps) {
         {/* Section: Quick actions */}
         <Section label="ACTIONS" open icon={FolderOpen}>
           <TreeRow
-            href="/search"
-            label="search"
-            icon={Search}
-            active={pathname === "/search"}
-            depth={1}
-          />
-          <TreeRow
             href="/editor"
             label="new-page"
             icon={Plus}

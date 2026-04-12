@@ -61,6 +61,7 @@ interface PagesClientProps {
   initialPages: PageItem[];
   initialTotal: number;
   allTags: TagItem[];
+  initialQuery?: string;
 }
 
 // ─── Column header with sort button ──────────────────────────────────────────
@@ -105,8 +106,13 @@ function ColHeader({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function PagesClient({ initialPages, initialTotal, allTags }: PagesClientProps) {
-  const [query, setQuery] = useState("");
+export function PagesClient({
+  initialPages,
+  initialTotal,
+  allTags,
+  initialQuery = "",
+}: PagesClientProps) {
+  const [query, setQuery] = useState(initialQuery);
   const [mode, setMode] = useState<SearchMode>("fulltext");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sort, setSort] = useState<SortKey>("updated");
